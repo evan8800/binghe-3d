@@ -1696,7 +1696,7 @@ function updateCars(dt){
   });
   CARS.body.instanceMatrix.needsUpdate = CARS.glass.instanceMatrix.needsUpdate = true;
 }
-const VER = '20261026o';
+const VER = '20261027a';
 // 下載失敗會自動重試（本機伺服器偶爾會中斷連線）
 async function fetchBuf(url, onProg, tries = 8){
   let lastErr;
@@ -1713,7 +1713,7 @@ async function fetchBuf(url, onProg, tries = 8){
       const reader = r.body.getReader(), chunks = []; let got = 0;
       for (;;){ const { done, value } = await reader.read(); if (done) break; last = performance.now(); chunks.push(value); got += value.length; if (onProg) onProg(got, total); }
       clearInterval(dog);
-      if (total && got !== total) throw new Error('資料不完整');
+      if (total && got < total) throw new Error('資料不完整');   // 雲端主機會壓縮傳輸，解壓後會比 content-length 大
       const buf = new Uint8Array(got); let o = 0; for (const c of chunks){ buf.set(c, o); o += c.length; }
       return buf.buffer;
     }catch(e){ clearInterval(dog); lastErr = e; console.warn('重試下載', url, e.message); await sleep(200 * (i + 1)); }

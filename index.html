@@ -1,0 +1,1070 @@
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>秉和新案 A5 戶</title></head><body><title>秉和新案 A5 戶空屋</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* 版面：全螢幕 3D；左上建案膠囊、右上俯視/漫遊切換、右下圓形功能鍵、底部可收合的空間卡片列。暖白毛玻璃單一淺色介面 */
+:root{
+  --paper:#f7f3ec;               /* 暖白底 */
+  --paper2:#efe9df;
+  --panel:rgba(250,247,241,.78); /* 毛玻璃 */
+  --panel2:rgba(255,253,249,.92);
+  --line:rgba(255,255,255,.75);
+  --edge:rgba(120,104,82,.18);
+  --fg:#2b2723;
+  --muted:#7b7266;
+  --accent:#e2bf78;              /* 香檳金 */
+  --accent2:#cfa35a;
+  --ink:#2b2723;
+  --shadow:0 10px 30px rgba(60,45,25,.18);
+  --sans:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:light;
+}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0;overflow:hidden;background:var(--paper);color:var(--fg);font-family:var(--sans)}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.hud{position:fixed;z-index:5;pointer-events:none}
+.hud > *{pointer-events:auto}
+.glass{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px) saturate(1.2)}
+button{font:500 13px var(--sans);color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 12px;cursor:pointer;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+button:hover{background:var(--panel2)}
+button:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
+button[aria-pressed="true"]{background:linear-gradient(180deg,#f0d394,var(--accent));color:var(--ink);border-color:#f3dca8}
+svg.ic{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* 左上建案膠囊 */
+#brand{top:calc(16px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));display:flex;align-items:center;gap:14px;border-radius:999px;padding:12px 22px}
+#brand b{font-size:18px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+#brand i{width:1px;height:20px;background:var(--edge)}
+#brand span{font-size:14px;color:var(--muted);letter-spacing:.08em;white-space:nowrap}
+/* 右上切換 */
+#modes{top:calc(16px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;align-items:center;gap:10px}
+.seg{display:flex;gap:4px;border-radius:999px;padding:5px}
+.seg button{display:flex;align-items:center;gap:6px;border-radius:999px;border-color:transparent;background:transparent;padding:8px 16px;font-size:14px;backdrop-filter:none}
+.seg button[aria-pressed="true"]{box-shadow:0 2px 8px rgba(160,120,50,.3)}
+.round{width:42px;height:42px;padding:0;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:16px;box-shadow:var(--shadow)}
+#helpPop{position:fixed;z-index:8;top:calc(70px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(300px,calc(100vw - 32px));border-radius:14px;padding:14px 16px;font-size:13px;line-height:1.75;color:var(--fg)}
+#helpPop b{display:block;font-size:14px;margin-bottom:4px}
+#hint{margin:0;color:var(--muted)}
+/* 右下功能鍵 */
+#side{right:max(16px,env(safe-area-inset-right,0px));bottom:calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:center;gap:14px}
+#aiBtn{width:96px;height:96px;border-radius:50%;padding:0;display:grid;place-content:center;justify-items:center;gap:4px;background:radial-gradient(circle at 35% 30%,#f7e2ad,var(--accent) 60%,var(--accent2));border:2px solid rgba(255,248,230,.9);font-weight:700;font-size:15px;color:var(--ink);box-shadow:0 10px 28px rgba(170,120,40,.35)}
+#aiBtn svg.ic{width:30px;height:30px;stroke-width:1.8}
+#aiBtn:hover{filter:brightness(1.04)}
+#agBtn{width:58px;height:58px;border-radius:50%;padding:0;overflow:hidden;display:grid;place-items:center;position:relative}
+#agBtn svg{width:58px;height:58px}
+#agBtn span{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;background:var(--panel2);border-radius:6px;padding:0 5px;white-space:nowrap}
+#brightBtn{width:54px;height:54px}
+#simBtn,#mapBtn{width:66px;height:66px;border-radius:50%;padding:0;display:grid;place-content:center;justify-items:center;gap:2px;font-size:11px;font-weight:700;box-shadow:var(--shadow)}
+#simBtn svg.ic,#mapBtn svg.ic{width:22px;height:22px}
+#sim{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(40,32,22,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#sim figure{margin:0;width:min(1200px,100%);max-height:100%;display:grid;gap:10px;background:var(--panel2);border:1px solid var(--line);border-radius:18px;padding:12px;box-shadow:var(--shadow)}
+#sim img{width:100%;max-height:calc(100vh - 140px);object-fit:contain;border-radius:12px;display:block;background:var(--paper2)}
+#sim figcaption{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:0 4px 2px}
+#sim figcaption b{font-size:16px;letter-spacing:.04em}
+#sim figcaption small{color:var(--muted);font-size:12px;margin-left:8px;font-weight:400}
+@media (max-width:760px){#simBtn,#mapBtn{width:54px;height:54px;font-size:10px}#simBtn svg.ic,#mapBtn svg.ic{width:18px;height:18px}}
+#brightBtn svg.ic{width:24px;height:24px}
+#bright{position:fixed;z-index:7;right:calc(max(16px,env(safe-area-inset-right,0px)) + 66px);bottom:calc(30px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:10px;border-radius:999px;padding:10px 16px;font-size:13px;color:var(--muted)}
+#bright input{width:120px;accent-color:var(--accent2)}
+/* 底部空間卡片列 */
+#dock{left:max(16px,env(safe-area-inset-left,0px));right:calc(max(16px,env(safe-area-inset-right,0px)) + 120px);bottom:calc(20px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+#dockToggle{display:flex;align-items:center;gap:6px;border-radius:999px;padding:7px 14px;font-size:13px;box-shadow:var(--shadow)}
+#dockToggle svg.ic{transition:transform .25s}
+#dock.closed #dockToggle svg.ic{transform:rotate(180deg)}
+#rooms{display:flex;gap:12px;overflow-x:auto;max-width:100%;padding:4px 4px 8px;scroll-snap-type:x mandatory;scrollbar-width:thin;transition:max-height .3s ease,opacity .25s;max-height:140px}
+#dock.closed #rooms{max-height:0;opacity:0;padding:0;pointer-events:none}
+.card{flex:none;width:150px;height:113px;padding:0;border-radius:18px;overflow:hidden;position:relative;scroll-snap-align:start;border:2px solid rgba(255,255,255,.85);background:var(--paper2);box-shadow:var(--shadow);text-align:left;transition:transform .2s,box-shadow .2s,border-color .2s}
+.card:hover{transform:translateY(-3px)}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,252,246,0) 25%,rgba(255,252,246,.82) 62%,rgba(255,252,246,.95))}
+.card .tx{position:absolute;z-index:1;left:12px;right:28px;bottom:9px;display:grid;gap:0}
+.card b{font-size:16px;letter-spacing:.06em}
+.card small{font-size:11px;color:var(--muted)}
+.card .chev{position:absolute;z-index:1;right:10px;bottom:14px;width:16px;height:16px}
+.card[aria-current="true"]{border-color:#f1d18e;box-shadow:0 0 0 3px rgba(226,191,120,.55),0 10px 28px rgba(170,120,40,.35)}
+.card[aria-current="true"]::after{background:linear-gradient(180deg,rgba(250,230,180,0) 25%,rgba(248,228,178,.82) 62%,rgba(246,224,170,.96))}
+#load{position:fixed;inset:0;z-index:20;display:grid;place-items:center;background:var(--paper)}
+#load div{display:grid;gap:10px;justify-items:center}
+#bar{width:220px;height:3px;background:var(--paper2);border-radius:2px;overflow:hidden}
+#bar i{display:block;height:100%;width:0;background:var(--accent2);transition:width .2s}
+#pct{font-family:var(--mono);font-size:12px;color:var(--muted)}
+#joy{position:fixed;z-index:6;left:calc(24px + env(safe-area-inset-left,0px));bottom:calc(var(--dockH,260px) + 20px + env(safe-area-inset-bottom,0px));width:110px;height:110px;border-radius:50%;border:1px solid var(--line);background:rgba(250,247,241,.35);touch-action:none}
+#joy i{position:absolute;left:35px;top:35px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.8)}
+#cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.85);box-shadow:0 0 0 1px rgba(0,0,0,.15);z-index:4;pointer-events:none}
+@media (max-width:760px){
+  #brand{padding:9px 16px;gap:10px}#brand b{font-size:15px}#brand span{font-size:12px}
+  #modes{top:calc(70px + env(safe-area-inset-top,0px))}
+  .seg button{padding:7px 12px;font-size:13px}
+  #helpPop{top:calc(124px + env(safe-area-inset-top,0px))}
+  #dock{right:calc(max(16px,env(safe-area-inset-right,0px)) + 86px)}
+  .card{width:112px;height:84px;border-radius:12px}.card b{font-size:15px}
+  #aiBtn{width:74px;height:74px;font-size:12px}#aiBtn svg.ic{width:24px;height:24px}
+  #agBtn{width:50px;height:50px}#agBtn svg{width:50px;height:50px}
+  #brightBtn{width:46px;height:46px}
+  #bright{right:calc(max(16px,env(safe-area-inset-right,0px)) + 56px)}
+}
+@media (prefers-reduced-motion:reduce){#bar i,#rooms,.card,#dockToggle svg.ic{transition:none}}
+
+/* AI 代銷小姐 */
+#agent{position:fixed;z-index:25;right:max(12px,env(safe-area-inset-right,0px));bottom:calc(8px + env(safe-area-inset-bottom,0px));display:flex;align-items:flex-end;gap:10px;pointer-events:none;max-width:calc(100% - 24px)}
+#agent > *{pointer-events:auto}
+body.ag-open #side,body.ag-open #dock,body.ag-open #bright{display:none}
+#agent.in #girl{animation:slideIn .55s cubic-bezier(.2,.9,.3,1.2) both}
+@keyframes slideIn{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+#agPanel{width:min(380px,calc(100vw - 230px));display:grid;gap:8px;margin-bottom:24px}
+#agBubble{background:var(--panel2);border:1px solid var(--line);color:#1d2533;border-radius:14px 14px 4px 14px;padding:12px 14px;font-size:14.5px;line-height:1.65;box-shadow:0 6px 24px rgba(0,0,0,.25);max-height:38vh;overflow:auto;white-space:pre-wrap}
+#agBubble .who{display:block;font-size:11px;letter-spacing:.12em;color:#8a7650;margin-bottom:2px;font-weight:700}
+#agChips{display:flex;flex-wrap:wrap;gap:6px}
+#agChips button{font-size:12px;padding:6px 10px;border-radius:16px}
+#agForm{display:flex;gap:6px}
+#agForm input{flex:1;min-width:0;font:14px var(--sans);color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:9px 14px}
+#agForm button{border-radius:20px}
+#agMic[aria-pressed="true"]{background:#c0605a;border-color:#c0605a;color:#fff}
+#agTop{display:flex;justify-content:space-between;align-items:center;gap:6px}
+#agTop span{font-size:11px;color:var(--muted);background:var(--panel);border-radius:4px;padding:3px 8px}
+#agTop button{padding:4px 10px;font-size:12px}
+#agXfer{background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:10px 12px;font-size:13px;display:grid;gap:6px}
+#agXfer b{color:var(--accent)}
+.dots i{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--accent);animation:dot 1.2s infinite}
+.dots i:nth-child(2){animation-delay:.2s}.dots i:nth-child(3){animation-delay:.4s}
+@keyframes dot{0%,80%,100%{opacity:.25}40%{opacity:1}}
+#l2dWrap{display:none;width:230px;height:330px;flex:none;filter:drop-shadow(0 8px 18px rgba(0,0,0,.28));-webkit-mask-image:linear-gradient(180deg,#000 86%,transparent 100%);mask-image:linear-gradient(180deg,#000 86%,transparent 100%)}
+#l2d{width:100%;height:100%;display:block;cursor:pointer}
+#agent.l2d #l2dWrap{display:block}#agent.l2d #girl{display:none}
+#agent.in #l2dWrap{animation:slideIn .55s cubic-bezier(.2,.9,.3,1.2) both}
+#girl{width:210px;height:auto;flex:none;filter:drop-shadow(0 8px 18px rgba(0,0,0,.28))}
+#girl .body{transform-origin:150px 520px;animation:breathe 3.6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.008,1.014)}}
+#girl .head{transform-origin:150px 205px;animation:sway 6s ease-in-out infinite;transition:transform .4s}
+@keyframes sway{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.8deg)}}
+#girl.talk .head{animation:nod .9s ease-in-out infinite}
+@keyframes nod{0%,100%{transform:rotate(-2deg) translateY(0)}50%{transform:rotate(2deg) translateY(2px)}}
+#girl .hairS{transform-origin:150px 150px;animation:hair 4s ease-in-out infinite}
+@keyframes hair{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(1.2deg)}}
+#girl .eyes{transform-origin:150px 168px;transition:transform .08s}
+#girl.blink .eyes{transform:scaleY(.08)}
+#girl .armR,#girl .armL{transition:transform .6s cubic-bezier(.3,1.3,.5,1)}
+#girl .armR{transform-origin:212px 262px}
+#girl .armL{transform-origin:88px 262px}
+#girl .hand{transition:transform .3s}
+#girl.g-wave .armR{transform:rotate(-142deg)}
+#girl.g-wave .handR{animation:wave .5s ease-in-out infinite alternate;transform-origin:206px 400px}
+@keyframes wave{from{transform:rotate(-16deg)}to{transform:rotate(18deg)}}
+#girl.g-point .armR{transform:rotate(-82deg)}
+#girl.g-explain .armR{transform:rotate(-26deg)}
+#girl.g-explain .armL{transform:rotate(26deg)}
+#girl.g-happy .armR{transform:rotate(-24deg)}
+#girl.g-happy .armL{transform:rotate(24deg)}
+#girl.g-think .armR{transform:rotate(-118deg) translate(-26px,8px)}
+#girl.g-bow .body{animation:none;transform:rotate(-6deg) translateY(10px)}
+#girl.g-bow .head{animation:none;transform:rotate(-10deg) translateY(16px)}
+#girl.g-bow .eyes{transform:scaleY(.1)}
+#girl .mouthO{display:none}
+#girl.mopen .mouthO{display:inline}
+#girl.mopen .mouthC{display:none}
+@media (max-width:640px){
+  #girl{width:130px}#l2dWrap{width:140px;height:200px}
+  #agPanel{width:calc(100vw - 160px);margin-bottom:12px}
+  #agBubble{font-size:13.5px;max-height:30vh}
+}
+@media (prefers-reduced-motion:reduce){#girl .body,#girl .head,#girl .hairS,.dots i{animation:none!important}}
+
+/* AI 裝潢渲染面板 */
+#ai{position:fixed;inset:0;z-index:30;background:rgba(60,48,34,.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:grid;place-items:center;padding-block:16px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#ai .box{width:min(1080px,100%);max-height:100%;overflow:auto;background:var(--panel2);border:1px solid var(--line);box-shadow:var(--shadow);border-radius:18px;padding:18px;display:grid;gap:14px}
+#ai header{display:flex;justify-content:space-between;align-items:center;gap:10px}
+#ai h2{margin:0;font-size:17px;letter-spacing:.04em}
+#ai .pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#ai figure{margin:0;display:grid;gap:6px;min-width:0}
+#ai figcaption{font-family:var(--mono);font-size:11px;letter-spacing:.1em;color:var(--muted)}
+#ai .img{aspect-ratio:16/10;max-width:100%;background:var(--paper2);border:1px solid var(--edge);border-radius:12px;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:13px;text-align:center;padding:0}
+#ai .img img{width:100%;height:100%;object-fit:cover;display:block}
+#ai .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#ai .lbl{font-size:12px;color:var(--muted);min-width:48px}
+#ai .chip[aria-pressed="true"]{background:var(--accent);color:var(--ink);border-color:var(--accent)}
+#ai textarea,#ai input,#ai select{font:13px var(--sans);color:var(--fg);background:#fff;border:1px solid var(--edge);border-radius:6px;padding:7px 9px;min-width:0}
+#ai textarea{width:100%;box-sizing:border-box;min-height:52px;resize:vertical}
+#ai details{border-top:1px solid var(--edge);padding-top:10px}
+#ai summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+#ai .set{display:grid;grid-template-columns:auto 1fr;gap:8px 10px;align-items:center;margin-top:10px}
+#ai .note{font-size:12px;color:var(--muted);line-height:1.6}
+#aiStatus{font-size:13px;color:var(--fg);min-height:1.4em}
+#aiStatus.err{color:#b4483e}
+#aiGo{background:var(--accent);color:var(--ink);border-color:var(--accent);font-weight:700}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:22px;height:22px;border:3px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 8px}
+@media (max-width:640px){#ai .pair{grid-template-columns:1fr}#ai .set{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.spin{animation:none}}
+
+</style>
+
+<canvas id="c"></canvas>
+<div id="load"><div><b style="letter-spacing:.06em">秉和新案 A5 戶</b><div id="bar"><i></i></div><span id="pct">載入模型 0%</span></div></div>
+
+<div class="hud glass" id="brand"><b>秉和新案 A5 戶</b><i></i><span>3房2衛</span></div>
+<div class="hud" id="modes">
+  <div class="seg glass"><button id="mGod" aria-pressed="false"><svg class="ic" viewBox="0 0 24 24"><path d="M3 9l9-5 9 5-9 5z"/><path d="M3 14l9 5 9-5"/></svg>俯視</button><button id="mWalk" aria-pressed="true"><svg class="ic" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M10 21v-5h4v5"/><circle cx="14.5" cy="12" r=".6"/></svg>漫遊</button></div>
+  <button id="mVR" class="round" hidden title="進入 VR">VR</button>
+  <button id="helpBtn" class="round" aria-expanded="false" aria-controls="helpPop" title="操作說明">?</button>
+</div>
+<div id="helpPop" class="glass" hidden><b>操作說明</b><p id="hint">點畫面鎖定視角 · W A S D／方向鍵移動 · 滑鼠轉向 · Esc 釋放</p><p style="margin:6px 0 0;color:var(--muted)">點下方空間卡片可直接前往；右下金色按鈕拍照做 AI 裝潢，頭像按鈕找 AI 代銷小昕。</p></div>
+<div class="hud" id="dock">
+  <button id="dockToggle" class="glass" aria-expanded="true" aria-controls="rooms"><svg class="ic" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg><span>收起空間</span></button>
+  <div id="rooms" role="list" aria-label="空間導覽"></div>
+</div>
+<div class="hud" id="side">
+  <button id="agBtn" type="button" title="AI 語音代銷小昕"><svg viewBox="70 60 160 170" aria-hidden="true"><rect x="70" y="60" width="160" height="170" fill="#f3e7d4"/><path d="M84 150 C80 92 116 62 150 62 C184 62 220 92 216 150 C214 170 210 186 206 196 L94 196 C90 186 86 170 84 150 Z" fill="#4b3024"/><path d="M98 140 C98 196 122 226 150 226 C178 226 202 196 202 140 C202 110 180 96 150 96 C120 96 98 110 98 140 Z" fill="#fbe0cf"/><ellipse cx="126" cy="166" rx="10" ry="12.5" fill="#6b4424"/><ellipse cx="174" cy="166" rx="10" ry="12.5" fill="#6b4424"/><circle cx="122" cy="161" r="3.4" fill="#fff"/><circle cx="170" cy="161" r="3.4" fill="#fff"/><path d="M140 203 Q150 211 160 203" stroke="#b5524d" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M96 140 C96 100 124 82 150 82 C178 82 206 100 204 142 C196 120 184 110 172 106 C176 118 170 128 160 132 C164 120 158 110 150 106 C146 122 132 132 116 134 C124 124 126 114 124 106 C110 114 100 126 96 140 Z" fill="#4b3024"/></svg><span>小昕</span></button>
+  <button id="mapBtn" type="button" title="周邊 3D 鳥瞰地圖"><svg class="ic" viewBox="0 0 24 24"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>鳥瞰地圖</button>
+  <button id="simBtn" type="button" title="裝潢模擬圖"><svg class="ic" viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.5" cy="9.5" r="1.6"/><path d="M21 16l-5-5-8 8.5"/></svg>模擬圖</button>
+  <button id="aiBtn" type="button" title="拍照後 AI 裝潢"><svg class="ic" viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/><circle cx="17.6" cy="10.4" r=".5"/></svg>AI 裝潢</button>
+  <button id="brightBtn" class="round" type="button" aria-expanded="false" aria-controls="bright" title="亮度"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.2M12 19.3v2.2M4.6 4.6l1.6 1.6M17.8 17.8l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.6 19.4l1.6-1.6M17.8 6.2l1.6-1.6"/></svg></button>
+</div>
+<div id="bright" class="glass" hidden><label for="exp">亮度</label><input id="exp" type="range" min="0.6" max="1.6" step="0.05" value="1"></div>
+<div id="sim" hidden role="dialog" aria-modal="true" aria-label="裝潢模擬圖"><figure><img id="simImg" src="sim/living.jpg" alt="客廳裝潢模擬圖：米白 L 型沙發、圓形石材茶几、淺灰地毯與造型天花間接照明"><figcaption><b>客廳 裝潢模擬圖<small>示意圖，實際以交屋標準與設計圖為準</small></b><button id="simClose" type="button">關閉</button></figcaption></figure></div>
+<div id="joy" hidden><i></i></div>
+<div id="cross" hidden></div>
+<div id="agent" hidden>
+  <div id="agPanel">
+    <div id="agTop"><span id="agWhere">小昕 · 秉和昕心 AI 代銷</span><button id="agClose" type="button">收起</button></div>
+    <div id="agBubble" aria-live="polite"><span class="who">小昕</span><span id="agText"></span></div>
+    <div id="agXfer" hidden><div><b>轉接真人顧問</b> <span class="dots"><i></i><i></i><i></i></span></div><div id="agXferMsg">正在為您轉接…</div><button id="agXferEnd" type="button">結束轉接</button></div>
+    <div id="agChips"></div>
+    <form id="agForm"><button id="agMic" type="button" aria-pressed="false" title="語音提問">語音</button><input id="agInput" placeholder="想了解什麼？例如：附近有哪些學校" autocomplete="off"><button id="agSend" type="submit">送出</button></form>
+  </div>
+  <div id="l2dWrap"><canvas id="l2d" aria-label="AI 代銷人員小昕（Live2D）"></canvas></div>
+  <svg id="girl" viewBox="0 0 300 560" role="img" aria-label="AI 代銷人員小昕">
+    <defs>
+      <linearGradient id="gSkin" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fde6d6"/><stop offset="1" stop-color="#f6cfb8"/></linearGradient>
+      <linearGradient id="gHair" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a3a2c"/><stop offset="1" stop-color="#3a2419"/></linearGradient>
+      <linearGradient id="gSuit" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#26385a"/><stop offset="1" stop-color="#18253d"/></linearGradient>
+      <radialGradient id="gIris" cx=".5" cy=".4" r=".6"><stop offset="0" stop-color="#b98a52"/><stop offset=".7" stop-color="#6b4424"/><stop offset="1" stop-color="#3b2312"/></radialGradient>
+    </defs>
+    <g class="body">
+      <path class="hairS" d="M86 150 C70 230 78 300 98 330 L202 330 C222 300 230 230 214 150 Z" fill="url(#gHair)"/>
+      <!-- 左手(畫面左) -->
+      <g class="armL">
+        <path d="M88 262 C70 300 66 350 70 400 L96 402 C96 356 100 312 110 282 Z" fill="url(#gSuit)"/>
+        <ellipse class="hand" cx="83" cy="410" rx="13" ry="15" fill="url(#gSkin)"/>
+      </g>
+      <!-- 身體 -->
+      <path d="M150 238 C118 240 96 250 86 268 C78 330 82 420 92 540 L208 540 C218 420 222 330 214 268 C204 250 182 240 150 238 Z" fill="url(#gSuit)"/>
+      <path d="M150 246 L126 252 L150 330 L174 252 Z" fill="#fbfaf7"/>
+      <path d="M126 252 L150 330 L138 340 L112 262 Z M174 252 L150 330 L162 340 L188 262 Z" fill="#1d2c48"/>
+      <path d="M136 252 C142 266 158 266 164 252 L158 276 L150 270 L142 276 Z" fill="#d8b878"/>
+      <rect x="168" y="300" width="34" height="13" rx="2" fill="#d8b878"/>
+      <text x="185" y="309.5" font-size="7.5" text-anchor="middle" fill="#1d2533" font-family="Noto Sans TC,sans-serif" font-weight="700">秉和昕心</text>
+      <circle cx="150" cy="360" r="3" fill="#d8b878"/><circle cx="150" cy="392" r="3" fill="#d8b878"/>
+      <!-- 右手(畫面右) -->
+      <g class="armR">
+        <path d="M212 262 C230 300 234 350 230 400 L204 402 C204 356 200 312 190 282 Z" fill="url(#gSuit)"/>
+        <path d="M204 396 L230 396 L230 404 L204 404 Z" fill="#fbfaf7"/>
+        <g class="hand handR"><ellipse cx="217" cy="414" rx="13" ry="15" fill="url(#gSkin)"/></g>
+      </g>
+      <!-- 頸 -->
+      <path d="M138 214 L162 214 L164 246 C156 252 144 252 136 246 Z" fill="#f2c6ad"/>
+      <g class="head">
+        <path d="M84 150 C80 92 116 62 150 62 C184 62 220 92 216 150 C214 170 210 186 206 196 L94 196 C90 186 86 170 84 150 Z" fill="url(#gHair)"/>
+        <ellipse cx="96" cy="176" rx="8" ry="12" fill="#f4cdb5"/><ellipse cx="204" cy="176" rx="8" ry="12" fill="#f4cdb5"/>
+        <path d="M98 140 C98 196 122 226 150 226 C178 226 202 196 202 140 C202 110 180 96 150 96 C120 96 98 110 98 140 Z" fill="url(#gSkin)"/>
+        <!-- 眉 -->
+        <path d="M112 142 Q126 134 138 140" stroke="#4a2e22" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M162 140 Q174 134 188 142" stroke="#4a2e22" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <g class="eyes">
+          <ellipse cx="126" cy="166" rx="13" ry="15" fill="#fff"/><ellipse cx="174" cy="166" rx="13" ry="15" fill="#fff"/>
+          <ellipse cx="127" cy="168" rx="10" ry="12.5" fill="url(#gIris)"/><ellipse cx="173" cy="168" rx="10" ry="12.5" fill="url(#gIris)"/>
+          <ellipse cx="127" cy="170" rx="5" ry="6.5" fill="#2a160a"/><ellipse cx="173" cy="170" rx="5" ry="6.5" fill="#2a160a"/>
+          <circle cx="122" cy="162" r="3.6" fill="#fff"/><circle cx="168" cy="162" r="3.6" fill="#fff"/>
+          <circle cx="131" cy="174" r="1.6" fill="#fff" opacity=".8"/><circle cx="177" cy="174" r="1.6" fill="#fff" opacity=".8"/>
+          <path d="M111 156 Q126 145 141 155" stroke="#2a160a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+          <path d="M159 155 Q174 145 189 156" stroke="#2a160a" stroke-width="3.4" fill="none" stroke-linecap="round"/>
+        </g>
+        <ellipse cx="114" cy="188" rx="9" ry="5" fill="#f5a3a0" opacity=".45"/><ellipse cx="186" cy="188" rx="9" ry="5" fill="#f5a3a0" opacity=".45"/>
+        <path d="M149 184 L147 192 L151 192" stroke="#d99a86" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <path class="mouthC" d="M140 203 Q150 211 160 203" stroke="#b5524d" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <g class="mouthO"><path d="M141 201 Q150 199 159 201 Q157 214 150 215 Q143 214 141 201 Z" fill="#9c3f3f"/><path d="M144 209 Q150 212 156 209 Q153 214 150 214 Q147 214 144 209 Z" fill="#e7837f"/></g>
+        <!-- 瀏海 -->
+        <path class="hairS" d="M96 140 C96 100 124 82 150 82 C178 82 206 100 204 142 C196 120 184 110 172 106 C176 118 170 128 160 132 C164 120 158 110 150 106 C146 122 132 132 116 134 C124 124 126 114 124 106 C110 114 100 126 96 140 Z" fill="url(#gHair)"/>
+        <path d="M118 92 Q150 78 186 94" stroke="#8a6a52" stroke-width="3" fill="none" opacity=".5" stroke-linecap="round"/>
+        <path d="M188 104 C200 96 210 98 214 106 C208 110 198 110 190 108 Z" fill="#d8b878"/>
+      </g>
+    </g>
+  </svg>
+</div>
+<div id="ai" hidden role="dialog" aria-modal="true" aria-labelledby="aiTitle">
+  <div class="box">
+    <header><h2 id="aiTitle">AI 裝潢渲染</h2><button id="aiClose" type="button">關閉</button></header>
+    <div class="pair">
+      <figure><figcaption>空屋現況 · <span id="aiRoom">—</span></figcaption><div class="img" id="aiShot"></div></figure>
+      <figure><figcaption>AI 裝潢後</figcaption><div class="img" id="aiOut">選好風格後按「開始生成」</div></figure>
+    </div>
+    <div id="aiAdvice" hidden style="background:var(--paper2);border:1px solid var(--edge);border-radius:6px;padding:10px 12px;font-size:13.5px;line-height:1.7"></div>
+    <div class="row"><span class="lbl">風格</span><span class="row" id="aiStyles"></span></div>
+    <div class="row" style="align-items:flex-start"><span class="lbl">補充</span><textarea id="aiExtra" placeholder="例如：L 型沙發、淺灰地毯、餐桌六人座（可留空）"></textarea></div>
+    <div class="row"><button id="aiGo" type="button">開始生成</button><button id="aiSave" type="button" hidden>下載圖片</button><span id="aiStatus" aria-live="polite"></span></div>
+    <details id="aiSetBox">
+      <summary>AI 供應商設定（目前：<span id="aiProvName"></span>）</summary>
+      <div class="set">
+        <label for="aiProv">供應商</label>
+        <select id="aiProv">
+          <option value="openai">OpenAI GPT Image 2.5（用 OpenAI API 金鑰）</option>
+          <option value="pollinations">Pollinations.ai（註冊送免費 Pollen 點數）</option>
+          <option value="gemini">Google Gemini 圖片模型（付費，新帳號可用 Google Cloud 試用金）</option>
+          <option value="proxy">自訂後端代理網址（正式上線用）</option>
+        </select>
+        <label for="aiModel">模型</label>
+        <input id="aiModel" placeholder="" list="aiModels"><datalist id="aiModels"><option value="gpt-image-2.5-flare"><option value="gpt-image-2.5-sunburst"></datalist>
+        <label for="aiKey">API 金鑰</label>
+        <input id="aiKey" type="password" autocomplete="off" placeholder="貼上金鑰，只存在這台瀏覽器">
+        <label for="aiProxy">代理網址</label>
+        <input id="aiProxy" placeholder="https://你的網域/api/render（選代理時才需要）">
+      </div>
+      <p class="note">裝潢建議由您的 Claude 帳號產生(看照片、寫建議與生圖指令)；Claude 不能直接畫圖，所以出圖這一步交給上面選的圖片 AI。金鑰只存在您這台瀏覽器。正式對外上線時，請改用「自訂後端代理」，把金鑰放在伺服器端，避免被他人看到。Claude 預覽頁面會擋外部連線，這個功能要在您自己架設的網站上才會出圖。</p>
+    </details>
+  </div>
+</div>
+
+<script src="live2d/lib/live2dcubismcore.min.js"></script>
+<script src="live2d/lib/pixi.min.js"></script>
+<script src="live2d/lib/cubism4.min.js"></script>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const LM_MAX = 4.0;           // 光照圖編碼上限(與烘焙編碼一致)
+const EYE = 1.60, RADIUS = 0.28, SPEED = 1.6;
+const B = (x, y, z = 0) => new THREE.Vector3(x, z, -y);   // Blender 座標 → three
+const ROOMS = [
+  ['玄關', '入口', [14.75, 14.35], [14.2, 9.0]],
+  ['客廳', '落地窗', [14.0, 7.2], [13.4, 13.0]],
+  ['餐廳', '開放式', [13.9, 12.0], [12.5, 15.2]],
+  ['廚房', 'L 型', [13.0, 12.9], [12.3, 15.4]],
+  ['主臥', '套房', [8.6, 9.0], [6.6, 6.9]],
+  ['主臥浴室', '浴缸', [5.85, 9.75], [5.0, 7.4]],
+  ['次臥一', '對外窗', [8.9, 11.0], [7.0, 14.6]],
+  ['次臥二', '對外窗', [11.6, 9.1], [10.3, 6.8]],
+  ['公共浴室', '淋浴', [10.35, 10.85], [10.6, 12.9]],
+  ['客廳陽台', '景觀', [13.3, 6.1], [13.6, 4.0]],
+  ['工作陽台', '洗衣', [10.6, 13.7], [9.6, 15.5]],
+];
+
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.xr.enabled = true;
+const scene = new THREE.Scene();
+// 天空漸層背景
+{
+  const cv = document.createElement('canvas'); cv.width = 8; cv.height = 256;
+  const g = cv.getContext('2d'); const gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#6f9bd6'); gr.addColorStop(0.47, '#cfe0f2'); gr.addColorStop(0.53, '#e6ecf2'); gr.addColorStop(1, '#a9b3bd');
+  g.fillStyle = gr; g.fillRect(0, 0, 8, 256);
+  const t = new THREE.CanvasTexture(cv); t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace;
+  scene.background = t;
+}
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;  // 只給金屬/亮面材質反射用
+
+const camera = new THREE.PerspectiveCamera(70, 1, 0.05, 600);
+// 窗外環景：大圓球包住整戶，內側貼 360° 環景照
+const PANO_R = 300, PANO_YAW = Math.PI / 2;   // PANO_YAW 調整環景朝向
+const pano = new THREE.Mesh(new THREE.SphereGeometry(PANO_R, 64, 32), new THREE.MeshBasicMaterial({ side: THREE.BackSide, toneMapped: false, depthWrite: false, fog: false }));
+pano.scale.x = -1; pano.rotation.y = PANO_YAW; pano.renderOrder = -1;
+pano.position.copy(new THREE.Vector3(10.2, 1.6 - PANO_R / 2, -10.3));   // 圓球往下移半徑的一半
+new THREE.TextureLoader().load('pano.jpg', (t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; pano.material.map = t; pano.material.needsUpdate = true; scene.add(pano); });
+const dolly = new THREE.Group(); dolly.add(camera); scene.add(dolly);
+const orbit = new OrbitControls(camera, canvas);
+orbit.enabled = false; orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI * 0.49;
+
+const colliders = [], ceilings = [], lmMats = [];
+let center = B(10.2, 10.3);
+
+const mgr = new THREE.LoadingManager();
+mgr.onProgress = (u, a, b) => setPct(a / b);
+function setPct(p) { document.querySelector('#bar i').style.width = (p * 100).toFixed(0) + '%'; document.getElementById('pct').textContent = '載入模型 ' + (p * 100).toFixed(0) + '%'; }
+const texLoader = new THREE.TextureLoader(mgr);
+function showErr(msg) { document.getElementById('pct').textContent = msg; document.querySelector('#bar i').style.background = '#c0605a'; }
+addEventListener('error', (e) => showErr('錯誤：' + (e.message || e)));
+addEventListener('unhandledrejection', (e) => showErr('錯誤：' + (e.reason && e.reason.message || e.reason)));
+// 讀 glTF JSON + 幾何(base64 文字) → 組成 GLB 交給 GLTFLoader
+async function loadModel() {
+  setPct(0.05);
+  const [j, b64] = await Promise.all([fetch('A5.json').then((r) => { if (!r.ok) throw new Error('A5.json ' + r.status); return r.text(); }),
+                                       fetch('A5_geo.txt').then((r) => { if (!r.ok) throw new Error('A5_geo.txt ' + r.status); return r.text(); })]);
+  setPct(0.3);
+  const bin = Uint8Array.from(atob(b64.trim()), (c) => c.charCodeAt(0));
+  const enc = new TextEncoder().encode(j);
+  const jl = Math.ceil(enc.length / 4) * 4, bl = Math.ceil(bin.length / 4) * 4;
+  const glb = new Uint8Array(12 + 8 + jl + 8 + bl);
+  const dv = new DataView(glb.buffer);
+  dv.setUint32(0, 0x46546C67, true); dv.setUint32(4, 2, true); dv.setUint32(8, glb.length, true);
+  dv.setUint32(12, jl, true); dv.setUint32(16, 0x4E4F534A, true); glb.fill(0x20, 20, 20 + jl); glb.set(enc, 20);
+  dv.setUint32(20 + jl, bl, true); dv.setUint32(24 + jl, 0x004E4942, true); glb.set(bin, 28 + jl);
+  return new Promise((res, rej) => new GLTFLoader(mgr).parse(glb.buffer, './', res, rej));
+}
+loadModel().then((gltf) => {
+  const root = gltf.scene;
+  root.children.slice().forEach((node) => {
+    const top = node.name;
+    const lmPath = node.userData && node.userData.lightmap;
+    node.traverse((o) => {
+      if (!o.isMesh) return;
+      if (top.startsWith('LM_')) {
+        const lm = texLoader.load(lmPath || `lm/${top}.jpg`);
+        lm.channel = 1; lm.flipY = false; lm.colorSpace = THREE.SRGBColorSpace;
+        o.material = o.material.clone();
+        const m = o.material;
+        m.lightMap = lm; m.lightMapIntensity = LM_MAX * Math.PI;
+        if (m.metalness > 0.5) { m.envMap = envTex; m.envMapIntensity = 0.9; }
+        else if (m.roughness < 0.5) { m.envMap = envTex; m.envMapIntensity = 0.12; }
+        lmMats.push(m);
+        if (top === 'LM_ceil') ceilings.push(o);
+        if (top === 'LM_wall' || top === 'LM_fix') colliders.push(o);
+      } else if (top === 'Glass') {
+        o.material = new THREE.MeshStandardMaterial({ color: 0xdfeef2, transparent: true, opacity: 0.14, roughness: 0.05, metalness: 0, depthWrite: false, envMap: envTex, envMapIntensity: 1 });
+        o.renderOrder = 2; colliders.push(o);
+      } else if (top === 'Lights') {
+        const em = o.material.emissive && o.material.emissive.getHex() > 0;
+        o.material = new THREE.MeshBasicMaterial({ color: em ? 0xfff1dc : 0xe9e7e3 });
+        ceilings.push(o);
+      }
+    });
+  });
+  scene.add(root);
+  const box = new THREE.Box3().setFromObject(root); box.getCenter(center); center.y = 0;
+  document.getElementById('load').hidden = true;
+  setWalk(ROOMS[0]);
+}).catch((err) => { showErr('模型載入失敗：' + (err && err.message || err)); console.error(err); });
+
+
+// ---------------- 模式
+let mode = 'walk', yaw = 0, pitch = 0;
+const pos = new THREE.Vector3();
+const btnGod = document.getElementById('mGod'), btnWalk = document.getElementById('mWalk');
+const hint = document.getElementById('hint'), joy = document.getElementById('joy'), cross = document.getElementById('cross');
+const touch = matchMedia('(pointer:coarse)').matches;
+
+function setGod() {
+  mode = 'god'; btnGod.setAttribute('aria-pressed', 'true'); btnWalk.setAttribute('aria-pressed', 'false');
+  ceilings.forEach((o) => (o.visible = false));
+  if (document.pointerLockElement) document.exitPointerLock();
+  camera.position.copy(center).add(new THREE.Vector3(3.2, 10.5, 7.0));
+  orbit.target.copy(center); orbit.enabled = true; orbit.update();
+  hint.textContent = touch ? '單指旋轉 · 雙指縮放平移' : '左鍵旋轉 · 右鍵平移 · 滾輪縮放 · 點空間名稱進入行走';
+  joy.hidden = true; cross.hidden = true;
+}
+function setWalk(room) {
+  mode = 'walk'; btnGod.setAttribute('aria-pressed', 'false'); btnWalk.setAttribute('aria-pressed', 'true');
+  ceilings.forEach((o) => (o.visible = true));
+  orbit.enabled = false;
+  if (room) {
+    const p = B(room[2][0], room[2][1]); const l = B(room[3][0], room[3][1]);
+    pos.set(p.x, EYE, p.z); yaw = Math.atan2(-(l.x - p.x), -(l.z - p.z)); pitch = -0.05;
+  }
+  hint.textContent = touch ? '左下搖桿移動 · 右側拖曳轉向' : '點畫面鎖定視角 · W A S D／方向鍵移動 · 滑鼠轉向 · Esc 釋放';
+  joy.hidden = !touch; cross.hidden = touch;
+}
+btnGod.onclick = setGod;
+btnWalk.onclick = () => setWalk(null);
+const roomBox = document.getElementById('rooms');
+const cards = [];
+ROOMS.forEach((r, i) => {
+  const b = document.createElement('button'); b.className = 'card'; b.type = 'button'; b.setAttribute('role', 'listitem');
+  const im = new Image(); im.alt = ''; im.loading = 'lazy'; im.src = `thumbs/${String(i).padStart(2, '0')}.jpg`;
+  im.onerror = () => im.remove();
+  const tx = document.createElement('span'); tx.className = 'tx';
+  tx.innerHTML = `<b></b><small></small>`; tx.querySelector('b').textContent = r[0]; tx.querySelector('small').textContent = r[1] || '';
+  b.append(im, tx);
+  b.insertAdjacentHTML('beforeend', '<svg class="ic chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>');
+  b.onclick = () => setWalk(r); roomBox.appendChild(b); cards.push(b);
+});
+function markRoom(name) { cards.forEach((c, i) => c.setAttribute('aria-current', String(ROOMS[i][0] === name && mode === 'walk'))); }
+setInterval(() => { if (mode === 'walk' && typeof nearestRoom === 'function') markRoom(nearestRoom()); else markRoom(''); }, 600);
+roomBox.addEventListener('wheel', (e) => { if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) { roomBox.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
+// 空間列展開/收起
+const dock = document.getElementById('dock'), dockBtn = document.getElementById('dockToggle');
+function setDock(open) {
+  dock.classList.toggle('closed', !open); dockBtn.setAttribute('aria-expanded', String(open));
+  dockBtn.querySelector('span').textContent = open ? '收起空間' : '展開空間';
+  try { localStorage.setItem('a5_dock', open ? '1' : '0'); } catch (_) {}
+  setTimeout(() => document.documentElement.style.setProperty('--dockH', dock.offsetHeight + 'px'), 320);
+}
+dockBtn.onclick = () => setDock(dock.classList.contains('closed'));
+let dockPref = '1'; try { dockPref = localStorage.getItem('a5_dock') ?? '1'; } catch (_) {}
+setDock(dockPref === '1');
+addEventListener('resize', () => document.documentElement.style.setProperty('--dockH', dock.offsetHeight + 'px'));
+// 說明與亮度彈出
+function pop(btn, el) { btn.onclick = () => { el.hidden = !el.hidden; btn.setAttribute('aria-expanded', String(!el.hidden)); }; }
+pop(document.getElementById('helpBtn'), document.getElementById('helpPop'));
+pop(document.getElementById('brightBtn'), document.getElementById('bright'));
+// 裝潢模擬圖
+const simEl = document.getElementById('sim');
+document.getElementById('simBtn').onclick = () => { if (document.pointerLockElement) document.exitPointerLock(); simEl.hidden = false; document.getElementById('simClose').focus(); };
+document.getElementById('simClose').onclick = () => (simEl.hidden = true);
+simEl.addEventListener('click', (e) => { if (e.target === simEl) simEl.hidden = true; });
+addEventListener('keydown', (e) => { if (e.code === 'Escape' && !simEl.hidden) simEl.hidden = true; });
+document.getElementById('exp').oninput = (e) => (renderer.toneMappingExposure = +e.target.value);
+
+// ---------------- 桌機：滑鼠鎖定 + 鍵盤
+const keys = {};
+addEventListener('keydown', (e) => { if (e.target.closest && e.target.closest('input,textarea,select')) return; keys[e.code] = true; });
+addEventListener('keyup', (e) => (keys[e.code] = false));
+canvas.addEventListener('click', () => { if (mode === 'walk' && !touch && canvas.requestPointerLock) { try { const p = canvas.requestPointerLock(); p && p.catch && p.catch(() => {}); } catch (_) {} } });
+let dragging = false, lx = 0, ly = 0;
+addEventListener('mousemove', (e) => {
+  if (mode !== 'walk') return;
+  if (document.pointerLockElement === canvas) look(e.movementX, e.movementY, 0.0022);
+  else if (dragging) { look(e.clientX - lx, e.clientY - ly, 0.004); lx = e.clientX; ly = e.clientY; }
+});
+canvas.addEventListener('mousedown', (e) => { if (!document.pointerLockElement) { dragging = true; lx = e.clientX; ly = e.clientY; } });
+addEventListener('mouseup', () => (dragging = false));
+function look(dx, dy, s) { yaw -= dx * s; pitch = Math.max(-1.3, Math.min(1.3, pitch - dy * s)); }
+
+// ---------------- 手機：搖桿 + 拖曳轉向
+const jv = { x: 0, y: 0 }; let joyId = null, lookId = null, tx = 0, ty = 0;
+const knob = joy.querySelector('i');
+joy.addEventListener('pointerdown', (e) => { joyId = e.pointerId; joy.setPointerCapture(e.pointerId); joyMove(e); });
+joy.addEventListener('pointermove', (e) => { if (e.pointerId === joyId) joyMove(e); });
+joy.addEventListener('pointerup', () => { joyId = null; jv.x = jv.y = 0; knob.style.transform = ''; });
+function joyMove(e) {
+  const r = joy.getBoundingClientRect(); let x = (e.clientX - r.left - 55) / 45, y = (e.clientY - r.top - 55) / 45;
+  const l = Math.hypot(x, y); if (l > 1) { x /= l; y /= l; }
+  jv.x = x; jv.y = y; knob.style.transform = `translate(${x * 35}px,${y * 35}px)`;
+}
+canvas.addEventListener('pointerdown', (e) => { if (e.pointerType === 'touch' && mode === 'walk') { lookId = e.pointerId; tx = e.clientX; ty = e.clientY; } });
+canvas.addEventListener('pointermove', (e) => { if (e.pointerId === lookId) { look(e.clientX - tx, e.clientY - ty, 0.005); tx = e.clientX; ty = e.clientY; } });
+canvas.addEventListener('pointerup', (e) => { if (e.pointerId === lookId) lookId = null; });
+
+// ---------------- 碰撞
+const ray = new THREE.Raycaster();
+function blocked(from, dir, dist) {
+  for (const h of [0.35, 1.1]) {
+    ray.set(new THREE.Vector3(from.x, h, from.z), dir); ray.far = dist + RADIUS;
+    if (ray.intersectObjects(colliders, false).length) return true;
+  }
+  return false;
+}
+function moveBy(base, dx, dz) {
+  const d = Math.hypot(dx, dz); if (d < 1e-5) return;
+  const dir = new THREE.Vector3(dx / d, 0, dz / d);
+  if (!blocked(base, dir, d)) { base.x += dx; base.z += dz; return; }
+  if (dx && !blocked(base, new THREE.Vector3(Math.sign(dx), 0, 0), Math.abs(dx))) base.x += dx;
+  if (dz && !blocked(base, new THREE.Vector3(0, 0, Math.sign(dz)), Math.abs(dz))) base.z += dz;
+}
+
+// ---------------- VR
+const vrBtn = document.getElementById('mVR');
+if (navigator.xr && navigator.xr.isSessionSupported) {
+  navigator.xr.isSessionSupported('immersive-vr').then((ok) => { vrBtn.hidden = !ok; }).catch(() => {});
+}
+vrBtn.onclick = async () => {
+  try {
+    const s = await navigator.xr.requestSession('immersive-vr', { optionalFeatures: ['local-floor'] });
+    renderer.xr.setReferenceSpaceType('local-floor');
+    await renderer.xr.setSession(s);
+  } catch (e) { hint.textContent = '無法進入 VR：' + e.message; }
+};
+let snapReady = true;
+renderer.xr.addEventListener('sessionstart', () => { if (mode !== 'walk') setWalk(null); dolly.position.set(pos.x, 0, pos.z); dolly.rotation.set(0, yaw, 0); camera.position.set(0, 0, 0); camera.rotation.set(0, 0, 0); });
+renderer.xr.addEventListener('sessionend', () => { dolly.position.set(0, 0, 0); dolly.rotation.set(0, 0, 0); });
+
+// ---------------- 主迴圈
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const dt = Math.min(clock.getDelta(), 0.05);
+  if (renderer.xr.isPresenting) {
+    const session = renderer.xr.getSession();
+    let mx = 0, mz = 0, turn = 0;
+    for (const src of session.inputSources) {
+      const gp = src.gamepad; if (!gp || gp.axes.length < 4) continue;
+      if (src.handedness === 'left') { mx = gp.axes[2]; mz = gp.axes[3]; }
+      if (src.handedness === 'right') turn = gp.axes[2];
+    }
+    if (Math.abs(turn) > 0.7 && snapReady) { dolly.rotation.y -= Math.sign(turn) * Math.PI / 6; snapReady = false; }
+    if (Math.abs(turn) < 0.3) snapReady = true;
+    if (Math.abs(mx) > 0.15 || Math.abs(mz) > 0.15) {
+      const q = new THREE.Quaternion(); camera.getWorldQuaternion(q);
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q); fwd.y = 0; fwd.normalize();
+      const right = new THREE.Vector3(1, 0, 0).applyQuaternion(q); right.y = 0; right.normalize();
+      const v = fwd.multiplyScalar(-mz).add(right.multiplyScalar(mx)).multiplyScalar(SPEED * dt);
+      const head = new THREE.Vector3(); camera.getWorldPosition(head);
+      const before = head.clone(); moveBy(head, v.x, v.z);
+      dolly.position.x += head.x - before.x; dolly.position.z += head.z - before.z;
+    }
+  } else if (mode === 'walk') {
+    let f = 0, s = 0;
+    if (keys.KeyW || keys.ArrowUp) f += 1; if (keys.KeyS || keys.ArrowDown) f -= 1;
+    if (keys.KeyD) s += 1; if (keys.KeyA) s -= 1;
+    if (keys.ArrowLeft) yaw += 1.6 * dt; if (keys.ArrowRight) yaw -= 1.6 * dt;
+    f -= jv.y; s += jv.x;
+    const sp = SPEED * (keys.ShiftLeft ? 1.8 : 1) * dt;
+    const fx = -Math.sin(yaw), fz = -Math.cos(yaw);
+    moveBy(pos, (fx * f + Math.cos(yaw) * s) * sp, (fz * f - Math.sin(yaw) * s) * sp);
+    camera.position.copy(pos);
+    camera.rotation.set(pitch, yaw, 0, 'YXZ');
+  } else {
+    orbit.update();
+  }
+  renderer.render(scene, camera);
+});
+
+// ================= AI 裝潢渲染 =================
+const AI_STYLES = {
+  '現代簡約': 'modern minimalist, light grey fabric sofa, clean lines, warm white and oak tones',
+  '北歐木質': 'Scandinavian Nordic style, light oak wood furniture, linen textiles, plants, cozy',
+  '日式無印': 'Japanese Muji style, natural wood, beige and white, low furniture, calm and tidy',
+  '現代輕奢': 'modern luxury style, marble accents, brass details, velvet, elegant lighting',
+  '工業風': 'industrial loft style, black metal, leather, concrete textures, warm Edison lighting',
+};
+const ROOM_EN = { 玄關: 'entrance foyer', 客廳: 'living room', 餐廳: 'dining room', 廚房: 'kitchen', 主臥: 'master bedroom', 主臥浴室: 'bathroom', 次臥一: 'bedroom', 次臥二: 'bedroom', 公共浴室: 'bathroom', 客廳陽台: 'balcony', 工作陽台: 'service balcony' };
+const PROV = {
+  openai: { name: 'OpenAI GPT Image 2.5', model: 'gpt-image-2.5-flare' },
+  pollinations: { name: 'Pollinations.ai', model: 'kontext' },
+  gemini: { name: 'Google Gemini', model: 'gemini-2.5-flash-image' },
+  proxy: { name: '自訂後端代理', model: '' },
+};
+const LS = { get: (k, d) => { try { return localStorage.getItem('a5ai_' + k) ?? d; } catch (_) { return d; } }, set: (k, v) => { try { localStorage.setItem('a5ai_' + k, v); } catch (_) {} } };
+const $ = (id) => document.getElementById(id);
+let aiStyle = LS.get('style', '現代簡約'), shotBlob = null, outUrl = null, aiRoom = '客廳';
+Object.keys(AI_STYLES).forEach((k) => {
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = k;
+  b.setAttribute('aria-pressed', String(k === aiStyle));
+  b.onclick = () => { aiStyle = k; LS.set('style', k); document.querySelectorAll('#aiStyles .chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b))); };
+  $('aiStyles').appendChild(b);
+});
+function loadSettings() {
+  const p = LS.get('prov', 'openai');
+  $('aiProv').value = p; $('aiProvName').textContent = PROV[p].name;
+  $('aiModel').value = LS.get('model_' + p, PROV[p].model); $('aiModel').placeholder = PROV[p].model || '由後端決定';
+  $('aiKey').value = LS.get('key_' + p, ''); $('aiProxy').value = LS.get('proxy', '');
+}
+$('aiProv').onchange = () => { LS.set('prov', $('aiProv').value); loadSettings(); };
+$('aiModel').onchange = () => LS.set('model_' + $('aiProv').value, $('aiModel').value.trim());
+$('aiKey').onchange = () => LS.set('key_' + $('aiProv').value, $('aiKey').value.trim());
+$('aiProxy').onchange = () => LS.set('proxy', $('aiProxy').value.trim());
+loadSettings();
+
+function nearestRoom() {
+  if (mode !== 'walk') return '客廳';
+  let best = ROOMS[0], bd = 1e9;
+  for (const r of ROOMS) { const p = B(r[2][0], r[2][1]); const d = (p.x - pos.x) ** 2 + (p.z - pos.z) ** 2; if (d < bd) { bd = d; best = r; } }
+  return best[0];
+}
+function capture() {
+  // 拍照：用目前視角畫一張不含介面的畫面，縮成 1280 寬 JPEG
+  if (mode === 'walk') { camera.position.copy(pos); camera.rotation.set(pitch, yaw, 0, 'YXZ'); }
+  renderer.render(scene, camera);
+  const w = 1280, h = Math.round(w * canvas.height / canvas.width);
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  c.getContext('2d').drawImage(canvas, 0, 0, w, h);
+  return new Promise((res) => c.toBlob(res, 'image/jpeg', 0.9));
+}
+function setStatus(t, err) { const s = $('aiStatus'); s.textContent = t; s.classList.toggle('err', !!err); }
+$('aiBtn').onclick = async () => {
+  if (document.pointerLockElement) document.exitPointerLock();
+  shotBlob = await capture(); aiRoom = nearestRoom();
+  $('aiRoom').textContent = mode === 'walk' ? aiRoom : '俯視';
+  $('aiShot').innerHTML = ''; const im = new Image(); im.alt = '目前視角的空屋截圖'; im.src = URL.createObjectURL(shotBlob); $('aiShot').appendChild(im);
+  $('aiOut').textContent = '選好風格後按「開始生成」'; $('aiSave').hidden = true; setStatus('');
+  $('ai').hidden = false; $('aiGo').focus();
+};
+$('aiClose').onclick = () => { $('ai').hidden = true; };
+addEventListener('keydown', (e) => { if (e.code === 'Escape' && !$('ai').hidden) $('ai').hidden = true; });
+
+function buildPrompt() {
+  const room = mode === 'walk' ? (ROOM_EN[aiRoom] || 'room') : 'apartment floor plan, top-down 3D cutaway view';
+  const extra = $('aiExtra').value.trim();
+  return `Furnish and decorate this empty ${room} in ${AI_STYLES[aiStyle]} style. ` +
+    'Keep the exact same camera angle, room layout, walls, ceiling, windows, doors, wood floor and kitchen/bathroom fixtures. ' +
+    'Only add furniture, rugs, curtains, artwork, plants and decorative lighting. Photorealistic interior design render, natural daylight, high detail.' +
+    (extra ? ' Additional request (Traditional Chinese): ' + extra : '');
+}
+const toB64 = (blob) => new Promise((res) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.readAsDataURL(blob); });
+
+async function callAI(prompt, blob) {
+  const prov = $('aiProv').value, key = $('aiKey').value.trim(), model = $('aiModel').value.trim() || PROV[prov].model;
+  if (prov === 'openai') {
+    if (!key) throw new Error('請先在「AI 供應商設定」貼上 OpenAI API 金鑰（platform.openai.com → API keys）');
+    const fd = new FormData(); fd.append('model', model); fd.append('prompt', prompt); fd.append('image', blob, 'room.jpg');
+    fd.append('size', '1536x1024'); fd.append('quality', model.includes('sunburst') ? 'high' : 'medium');
+    const r = await fetch('https://api.openai.com/v1/images/edits', { method: 'POST', headers: { Authorization: 'Bearer ' + key }, body: fd });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(`OpenAI 回應 ${r.status}：${(j.error && j.error.message || '').slice(0, 200)}`);
+    const d = j.data && j.data[0];
+    if (d && d.b64_json) return 'data:image/png;base64,' + d.b64_json;
+    if (d && d.url) return d.url;
+    throw new Error('OpenAI 沒有回傳圖片');
+  }
+  if (prov === 'pollinations') {
+    if (!key) throw new Error('請先在「AI 供應商設定」貼上 Pollinations 金鑰（到 enter.pollinations.ai 註冊取得）');
+    const fd = new FormData(); fd.append('model', model); fd.append('prompt', prompt); fd.append('image', blob, 'room.jpg');
+    const r = await fetch('https://gen.pollinations.ai/v1/images/edits', { method: 'POST', headers: { Authorization: 'Bearer ' + key }, body: fd });
+    if (!r.ok) throw new Error(`Pollinations 回應 ${r.status}：${(await r.text()).slice(0, 160)}`);
+    const ct = r.headers.get('content-type') || '';
+    if (ct.startsWith('image/')) return URL.createObjectURL(await r.blob());
+    const j = await r.json(); const d = j.data && j.data[0];
+    if (d && d.b64_json) return 'data:image/png;base64,' + d.b64_json;
+    if (d && d.url) return d.url;
+    throw new Error('Pollinations 沒有回傳圖片');
+  }
+  if (prov === 'gemini') {
+    if (!key) throw new Error('請先在「AI 供應商設定」貼上 Google AI Studio 的 API 金鑰');
+    const body = { contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: 'image/jpeg', data: await toB64(blob) } }] }], generationConfig: { responseModalities: ['IMAGE', 'TEXT'] } };
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key }, body: JSON.stringify(body) });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(`Gemini 回應 ${r.status}：${(j.error && j.error.message || '').slice(0, 160)}`);
+    const parts = (j.candidates && j.candidates[0] && j.candidates[0].content && j.candidates[0].content.parts) || [];
+    const img = parts.find((p) => p.inlineData || p.inline_data);
+    if (!img) throw new Error('Gemini 沒有回傳圖片');
+    const d = img.inlineData || img.inline_data;
+    return `data:${d.mimeType || d.mime_type || 'image/png'};base64,${d.data}`;
+  }
+  // 自訂後端：POST JSON {prompt, image(base64 jpeg), style, room} → 回 {image: base64 或網址}
+  const url = $('aiProxy').value.trim();
+  if (!url) throw new Error('請先填入後端代理網址');
+  const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt, image: await toB64(blob), style: aiStyle, room: aiRoom }) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || !j.image) throw new Error(`代理回應 ${r.status}：${(j.error || '沒有回傳圖片').toString().slice(0, 160)}`);
+  return j.image.startsWith('http') || j.image.startsWith('data:') ? j.image : 'data:image/png;base64,' + j.image;
+}
+async function claudeAdvice(prompt) {
+  // 用使用者的 Claude 帳號看截圖，寫繁中裝潢建議 + 英文生圖指令
+  const f = await (window.claude && window.claude.use ? window.claude.use('sample') : null);
+  if (!f) return null;
+  const lim = await f.limits().catch(() => null);
+  const room = mode === 'walk' ? aiRoom : '全戶俯視';
+  const ask = `你是室內設計師。圖片是台中「秉和昕心」建案A5戶空屋的${room}截圖。請依「${aiStyle}」風格提出裝潢建議。` +
+    ($('aiExtra').value.trim() ? `客戶補充需求：${$('aiExtra').value.trim()}。` : '') +
+    '只回覆JSON：{"advice":"繁體中文3到5句建議，說明家具配置、配色、燈光與收納，口語好懂","prompt":"英文圖片生成指令，保留原本視角、牆、窗、門、地板與廚衛設備，只加入家具軟裝，photorealistic interior render"}';
+  return f.json(ask, lim && lim.images ? { images: shotBlob, modelTier: 'default' } : { modelTier: 'default' });
+}
+$('aiGo').onclick = async () => {
+  if (!shotBlob) return;
+  $('aiGo').disabled = true; $('aiSave').hidden = true;
+  let prompt = buildPrompt();
+  $('aiAdvice').hidden = false; $('aiAdvice').textContent = 'Claude 正在看照片，整理裝潢建議…';
+  try {
+    const r = await claudeAdvice(prompt);
+    if (r && r.advice) { $('aiAdvice').innerHTML = '<b style="color:var(--accent)">Claude 裝潢建議</b><br>'; $('aiAdvice').append(r.advice); if (r.prompt) prompt = String(r.prompt); }
+    else $('aiAdvice').hidden = true;
+  } catch (e) {
+    $('aiAdvice').textContent = e && e.code === 'not_granted' ? '您沒有允許這個頁面使用 Claude，所以略過裝潢建議。' : 'Claude 裝潢建議暫時無法取得，直接進行出圖。';
+  }
+  $('aiOut').innerHTML = '<div><div class="spin"></div>圖片 AI 生成中，約 10–40 秒</div>';
+  setStatus(`出圖：${PROV[$('aiProv').value].name} · 風格：${aiStyle}`);
+  try {
+    outUrl = await callAI(prompt, shotBlob);
+    const im = new Image(); im.alt = `AI 生成的${aiStyle}裝潢示意圖`; im.src = outUrl;
+    await im.decode().catch(() => {});
+    $('aiOut').innerHTML = ''; $('aiOut').appendChild(im);
+    setStatus('完成。此為 AI 示意圖，實際裝潢以設計圖為準。'); $('aiSave').hidden = false;
+  } catch (e) {
+    const blocked = e instanceof TypeError || /Failed to fetch|NetworkError|Load failed/.test(String(e.message));
+    $('aiOut').textContent = '沒有產生圖片';
+    setStatus(blocked ? 'Claude 帳號不能產生圖片；出圖要連圖片 AI，Claude 預覽頁會擋外部連線，請在您自架的網站上使用。上方是 Claude 的裝潢建議。' : e.message, true);
+  } finally { $('aiGo').disabled = false; }
+};
+$('aiSave').onclick = () => { if (!outUrl) return; const a = document.createElement('a'); a.href = outUrl; a.download = `A5_${aiRoom}_${aiStyle}.png`; a.target = '_blank'; document.body.appendChild(a); a.click(); a.remove(); };
+
+
+// ================= AI 語音代銷：小昕 =================
+const KB = `【建案】秉和昕心，秉和建設投資興建。接待會館：臺中市太平區祥順路一段11號。地上15層、地下4層，1棟，住家89戶與店面1戶；規劃1到3房，約22到44坪；平面車位，配比約1比1.14，設有電動車充電設備(含預留)；預計2027年第四季完工(以建商公告為準)。位於太平「新光」生活圈，鄰近公園與重劃區。
+【本戶 A5】3房2衛的空屋展示。進門玄關後是開放式L型廚具：雙口爐、排油煙機、上吊櫃與下櫃、水槽、石英石檯面與櫃下燈，廚房旁有工作陽台可放洗衣機。餐廳與客廳前後連通，客廳有大面落地窗通往客廳陽台，採光好；客廳天花是造型天花加間接照明與崁燈(展示示意)。主臥是套房，專屬衛浴有獨立浴缸、淋浴區和轉角窗；另外兩間次臥都有對外窗。公共浴室有淋浴拉門乾濕分離與對外窗。三房集中在走道一側，公私領域分明。展示採木紋地板、白色粉刷牆與木門，實際建材依合約建材表。
+【周邊(依公開報導，時間為約略)】學區：新光國小、新光國中(實際學區以教育局公告為準)。生活：中興路家樂福商圈、太平區公所、太平運動場一帶機能完整；往一中商圈、三井LaLaport可走振興路、樂業路。交通：台74線快速道路可串聯台中市區，形成環台中生活圈；鄰近台鐵精武車站。休閒：區內有坪林森林公園等綠地。
+【未來願景】台中捷運藍線(台中港到台中車站)推動中；藍線延伸太平線規劃從東平路經中興東路、中興路、太平路、振興路到進德路，在帝國糖廠站銜接藍線，約4.66公里、地下化4站，目前可行性研究送中央審議中、尚未核定。依報導，太平區近年人口增加數、結婚與出生數都名列全市前段，是年輕家庭成長的區域。`;
+const RULES = `你是「小昕」，秉和昕心建案的AI代銷小姐，正在網頁3D樣品屋裡陪客戶看A5戶。
+說話規則：
+1. 只用繁體中文(台灣用語)，親切專業、像真人代銷，第一人稱「我」，稱呼「您」。
+2. 每次回答2到4句、120字以內，會被語音唸出來，所以不要條列、不要表情符號、不要網址。
+3. 只根據下方資料介紹房屋優點、周邊公共設施、交通與未來建設；資料沒有的不要編造，說「這部分我請專人提供詳細資料給您」。未核定的建設要說明「規劃中」。
+4. 絕對不談價格、單價、總價、行情、折扣、優惠、貸款成數、投資報酬或增值預測。被問到時說：價格會依市場行情與樓層戶別調整，為了給您最準確的資訊，我幫您轉接專人顧問。並把 transfer 設為 true。
+5. 不批評其他建案或建商；遇到色情、暴力、政治等無關或敏感話題，禮貌婉拒並把話題拉回房屋介紹。
+6. 客戶目前所在空間會提供給你，可以順勢介紹該空間。
+只回覆一個 JSON：{"say":"要說的話","gesture":"wave|point|explain|happy|think|bow","transfer":false,"chips":["客戶可能的追問1","追問2","追問3"]}
+gesture：打招呼用 wave，介紹位置或方向用 point，說明特色用 explain，分享好消息用 happy，思考用 think，婉拒或致歉用 bow。chips 每個10字以內。
+資料：
+` + KB;
+const PRICE_RE = /價|多少錢|行情|單價|總價|一坪|每坪|坪數.*錢|房價|優惠|折扣|成交|實價|貸款|頭期|付款|自備款|成數|划算|增值|投報/;
+const FAQ = [
+  [/學校|學區|國小|國中|小孩|上學/, '這裡屬於新光國小、新光國中周邊，生活圈裡學校選擇很方便。實際學區還是以教育局公告為準，我也可以請專人提供學區資料給您。', 'point'],
+  [/捷運|交通|74|快速道路|火車|公車|通勤/, '交通上可以接台74線快速道路串聯台中市區，附近也有台鐵精武車站。未來台中捷運藍線規劃延伸到太平，目前在中央審議中，是很值得期待的建設。', 'point'],
+  [/公園|綠地|運動|散步/, '社區鄰近公園與重劃區，太平區內也有坪林森林公園、太平運動場等休閒空間，假日帶家人散步運動都很方便。', 'explain'],
+  [/買菜|商圈|購物|逛街|家樂福|百貨/, '日常採買可以到中興路家樂福商圈，想逛街看電影，一中商圈、三井LaLaport也都有道路可以快速到達。', 'explain'],
+  [/廚房|廚具/, '這戶是開放式L型廚具，有雙口爐、排油煙機、上下櫃和石英石檯面，旁邊還有工作陽台可以放洗衣機，家事動線很順。', 'explain'],
+  [/主臥|浴缸|套房/, '主臥是套房設計，專屬衛浴有獨立浴缸、淋浴區和轉角窗，泡澡的時候也能享受自然光。', 'happy'],
+  [/客廳|陽台|採光/, '客廳有大面落地窗通往陽台，採光很好，搭配造型天花和間接照明，空間感很舒服。', 'explain'],
+  [/車位|停車|充電/, '社區規劃平面車位，配比大約1比1.14，也有電動車充電設備，停車很方便。', 'explain'],
+];
+const AG = { open: false, turns: [], busy: false, xfer: false, speakId: 0 };
+const girl = $('girl'), agText = $('agText');
+let sampleFn = null;
+(window.claude && window.claude.use ? window.claude.use('sample') : Promise.resolve(null)).then((f) => { sampleFn = f; }).catch(() => {});
+
+function setGesture(g) {
+  girl.classList.remove('g-wave', 'g-point', 'g-explain', 'g-happy', 'g-think', 'g-bow');
+  if (g) girl.classList.add('g-' + g);
+  l2dGesture(g);
+}
+
+// ---------- Live2D 小晴人物模組（沿用智慧大樓大廳版） ----------
+const L2D = { model: null, app: null, mouth: 0, wave: 0, think: 0, ready: false };
+async function initLive2D() {
+  if (L2D.app || !window.PIXI || !PIXI.live2d || !window.Live2DCubismCore) return;
+  try {
+    const W = 460, H = 660;
+    const app = new PIXI.Application({ view: $('l2d'), width: W, height: H, backgroundAlpha: 0, antialias: true, resolution: Math.min(2, devicePixelRatio || 1), autoDensity: false });
+    $('l2d').style.width = ''; $('l2d').style.height = '';
+    L2D.app = app;
+    const m = await PIXI.live2d.Live2DModel.from('live2d/Haru/Haru.model3.json', { autoInteract: false });
+    const sc = (H * 1.95) / m.internalModel.originalHeight;
+    m.scale.set(sc); m.x = (W - m.width) / 2; m.y = H * 0.02;
+    app.stage.addChild(m); L2D.model = m;
+    const core = m.internalModel.coreModel;
+    m.internalModel.on('beforeModelUpdate', () => {
+      let v = 0;
+      if (girl.classList.contains('talk')) {
+        if (AUD.an && AUD.cur && !AUD.cur.paused && !AUD.cur.ended) { AUD.an.getByteTimeDomainData(AUD.buf); let q = 0; for (const x of AUD.buf) { const d = (x - 128) / 128; q += d * d; } v = Math.min(1, Math.sqrt(q / AUD.buf.length) * 5); }
+        else { const t = performance.now() / 1000; v = Math.max(0, .55 + .45 * Math.sin(t * 17) * Math.sin(t * 5.3)); }
+      }
+      L2D.mouth += (v - L2D.mouth) * .5; core.setParameterValueById('ParamMouthOpenY', L2D.mouth);
+      const lerp = (id, to, e) => { const c = core.getParameterValueById(id); core.setParameterValueById(id, c + (to - c) * e); };
+      if (L2D.wave) { // 揮手：右手舉到肩旁、手掌左右擺
+        const t = (performance.now() - L2D.wave) / 1000, D = 2.6;
+        if (t > D) L2D.wave = 0; else {
+          const e = Math.min(1, t / .35, (D - t) / .35);
+          core.setPartOpacityById('Part01ArmRB001', 1); core.setPartOpacityById('Part01ArmRA001', 0);
+          lerp('ParamArmRB', 4.2, e); core.setParameterValueById('ParamHandAngleR', Math.sin(t * Math.PI * 4.4) * e);
+          lerp('ParamEyeLSmile', .9, e); lerp('ParamEyeRSmile', .9, e); lerp('ParamMouthForm', 1, e);
+          lerp('ParamBodyAngleZ', -5, e); lerp('ParamAngleZ', 6 + 3 * Math.sin(t * Math.PI * 2.2), e);
+        }
+      }
+      if (L2D.think) { // 思考：歪頭、眼睛往上看
+        const t = (performance.now() - L2D.think) / 1000, e = Math.min(1, t / .4);
+        lerp('ParamAngleZ', -10, e); lerp('ParamAngleX', 8, e); lerp('ParamEyeBallX', .5, e); lerp('ParamEyeBallY', .7, e); lerp('ParamBodyAngleZ', 3, e);
+      }
+    });
+    $('l2d').addEventListener('pointerdown', () => { l2dMotion(Math.floor(Math.random() * 4)); });
+    L2D.ready = true; $('agent').classList.add('l2d');
+    // 用小晴的臉做右側頭像按鈕
+    try {
+      app.render(); const r = app.renderer.resolution, cv = document.createElement('canvas'); cv.width = cv.height = 160;
+      const S = W * 0.38, sx = (W - S) / 2, sy = H * 0.165;
+      const g = cv.getContext('2d'); g.fillStyle = '#f3e7d4'; g.fillRect(0, 0, 160, 160);
+      g.drawImage($('l2d'), sx * r, sy * r, S * r, S * r, 0, 0, 160, 160);
+      cv.toBlob((b) => { if (!b) return; const im = new Image(); im.alt = ''; im.src = URL.createObjectURL(b); im.style.cssText = 'width:100%;height:100%;object-fit:cover'; const sv = $('agBtn').querySelector('svg'); if (sv) sv.replaceWith(im); }, 'image/png');
+    } catch (_) {}
+    if (!AG.open) app.ticker.stop();
+  } catch (e) { console.warn('Live2D 載入失敗，改用 2D 插畫', e); }
+}
+function l2dMotion(i) { try { L2D.model && L2D.model.motion('TapBody', i, 3); } catch (_) {} }
+function l2dExpr(n) { try { L2D.model && L2D.model.expression(n); } catch (_) {} }
+// 話題動作 → Live2D 動作
+const L2D_MAP = { wave: () => { L2D.wave = performance.now(); }, happy: () => { l2dExpr('F05'); l2dMotion(0); }, explain: () => l2dMotion(1), point: () => l2dMotion(2), bow: () => l2dMotion(3) };
+let lastG = null;
+function l2dGesture(g) {
+  if (!L2D.ready) return;
+  L2D.think = g === 'think' ? (L2D.think || performance.now()) : 0;
+  if (!g) { if (lastG === 'happy') l2dExpr('F01'); lastG = null; return; }
+  if (g === lastG) return; lastG = g;
+  (L2D_MAP[g] || (() => {}))();
+}
+(function blinkLoop() { setTimeout(() => { girl.classList.add('blink'); setTimeout(() => girl.classList.remove('blink'), 130); blinkLoop(); }, 2400 + Math.random() * 2600); })();
+
+// 語音合成：挑台灣中文聲音；說話時嘴型開合
+let zhVoice = null;
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  zhVoice = vs.find((v) => /HsiaoChen/i.test(v.name) && /Natural|Online/i.test(v.name)) || vs.find((v) => /zh[-_]TW/i.test(v.lang) && /Natural|Online/i.test(v.name)) || vs.find((v) => /zh[-_]TW/i.test(v.lang) && /Google/i.test(v.name)) || vs.find((v) => /zh[-_]TW/i.test(v.lang) && /female|Hsiao|Mei|Yating|HanHan/i.test(v.name)) || vs.find((v) => /zh[-_]TW/i.test(v.lang)) || vs.find((v) => /^zh/i.test(v.lang)) || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+let mouthTimer = null;
+function talking(on) {
+  girl.classList.toggle('talk', on);
+  clearInterval(mouthTimer); girl.classList.remove('mopen');
+  if (on) mouthTimer = setInterval(() => girl.classList.toggle('mopen', Math.random() > 0.35), 110);
+}
+// 本機伺服器（開啟網頁.bat）：Gemini 問答 + 小晴同款語音；沒有伺服器就用 Claude + 瀏覽器語音
+let SRV = null;
+fetch('api/ping', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j && j.ok) { SRV = j; console.log('本機伺服器', j); } }).catch(() => {});
+const AUD = { cur: null, an: null, buf: null, ctx: null };
+const TTS_CACHE = new Map();
+function ttsFetch(t) {
+  if (!TTS_CACHE.has(t)) {
+    const p = fetch('api/tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t }) })
+      .then((r) => (r.ok ? r.blob() : null)).catch(() => null);
+    TTS_CACHE.set(t, p); if (TTS_CACHE.size > 60) TTS_CACHE.delete(TTS_CACHE.keys().next().value);
+  }
+  return TTS_CACHE.get(t);
+}
+function audioCtx() {
+  try { const C = AUD.ctx || (AUD.ctx = new (window.AudioContext || window.webkitAudioContext)()); if (C.state === 'suspended') C.resume(); return C; } catch (_) { return null; }
+}
+function playBlob(blob, id) {
+  return new Promise((res) => {
+    if (id !== AG.speakId) return res();
+    const url = URL.createObjectURL(blob), a = new Audio(url); AUD.cur = a;
+    try { const C = audioCtx(); if (C) { const src = C.createMediaElementSource(a), an = C.createAnalyser(); an.fftSize = 512; src.connect(an); an.connect(C.destination); AUD.an = an; AUD.buf = new Uint8Array(an.fftSize); } } catch (_) { AUD.an = null; }
+    const fin = () => { URL.revokeObjectURL(url); if (AUD.cur === a) AUD.cur = null; res(); };
+    a.onended = fin; a.onerror = fin; a.onplay = () => talking(true);
+    a.play().catch(fin);
+  });
+}
+function speak(text) {
+  const id = ++AG.speakId;
+  const parts = (text.match(/[^。！？!?]+[。！？!?]?/g) || [text]).map((x) => x.trim()).filter(Boolean);
+  if (SRV && SRV.tts) {
+    return (async () => {
+      const blobs = parts.map(ttsFetch);          // 全部先送去合成，播放時不用等
+      for (let i = 0; i < parts.length; i++) {
+        const b = await blobs[i];
+        if (id !== AG.speakId) return;
+        if (!b) { await browserSpeak(parts.slice(i), id); return; }   // 本機語音失敗就改用瀏覽器語音
+        await playBlob(b, id);
+      }
+      if (id === AG.speakId) talking(false);
+    })();
+  }
+  return browserSpeak(parts, id);
+}
+function browserSpeak(parts, id) {
+  const text = parts.join('');
+  return new Promise((done) => {
+    const fallback = () => { talking(true); setTimeout(() => { if (id === AG.speakId) talking(false); done(); }, Math.min(9000, 300 + text.length * 170)); };
+    if (!('speechSynthesis' in window)) return fallback();
+    try {
+      speechSynthesis.cancel();
+      let i = 0, started = false;
+      const next = () => {
+        if (id !== AG.speakId) return done();
+        if (i >= parts.length) { talking(false); return done(); }
+        const u = new SpeechSynthesisUtterance(parts[i++]);
+        u.lang = 'zh-TW'; if (zhVoice) u.voice = zhVoice;
+        const natural = zhVoice && /Natural|Online/i.test(zhVoice.name);
+        u.rate = natural ? 1.05 : 1.02; u.pitch = natural ? 1 : 1.12;
+        u.onstart = () => { started = true; talking(true); };
+        u.onend = next; u.onerror = next;
+        speechSynthesis.speak(u);
+      };
+      next();
+      setTimeout(() => { if (!started && id === AG.speakId) { speechSynthesis.cancel(); fallback(); } }, 1500);
+    } catch (_) { fallback(); }
+  });
+}
+function stopSpeak() { AG.speakId++; try { speechSynthesis.cancel(); } catch (_) {} if (AUD.cur) { try { AUD.cur.pause(); } catch (_) {} AUD.cur = null; } talking(false); }
+
+function setChips(list) {
+  const box = $('agChips'); box.innerHTML = '';
+  (list || []).slice(0, 4).forEach((c) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = c; b.onclick = () => ask(c); box.appendChild(b); });
+}
+function curRoom() { return mode === 'walk' ? nearestRoom() : '俯視全戶'; }
+async function say(text, gesture, chips) {
+  agText.textContent = text; setGesture(gesture || 'explain'); setChips(chips);
+  await speak(text);
+  if (!AG.busy) setGesture(null);
+}
+function startTransfer() {
+  AG.xfer = true; $('agXfer').hidden = false; $('agXferMsg').textContent = '正在為您轉接真人顧問…';
+  setTimeout(() => { if (AG.xfer) $('agXferMsg').textContent = '展示模式：尚未串接真人客服。正式上線後，這裡會接通銷售中心的顧問語音。'; }, 3500);
+}
+$('agXferEnd').onclick = () => { AG.xfer = false; $('agXfer').hidden = true; };
+
+function faqAnswer(q) {
+  for (const [re, ans, g] of FAQ) if (re.test(q)) return { say: ans, gesture: g };
+  return { say: '這個問題我先記下來，會請專人提供詳細資料給您。您也可以問我學區、交通、公園、捷運規劃或這戶的格局特色喔！', gesture: 'think' };
+}
+async function ask(q) {
+  q = String(q || '').trim(); if (!q || AG.busy) return;
+  stopSpeak(); $('agInput').value = '';
+  if (PRICE_RE.test(q)) {
+    await say('價格會依市場行情和樓層戶別調整，為了給您最準確的資訊，我幫您轉接專人顧問為您說明喔！', 'bow', ['附近有哪些學校', '捷運什麼時候到', '這戶格局優點']);
+    startTransfer(); return;
+  }
+  AG.busy = true; setGesture('think'); agText.textContent = '讓我想一下…'; setChips([]);
+  let r = null;
+  if (SRV && SRV.gemini) {
+    AG.turns.push({ role: 'user', content: `(客戶目前在：${curRoom()})\n${q}` });
+    const turns = AG.turns.slice(-8); if (turns[0].role !== 'user') turns.shift();
+    try {
+      const res = await fetch('api/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system: RULES, messages: turns }) });
+      r = res.ok ? await res.json() : null;
+      if (!r || typeof r.say !== 'string') throw new Error('bad');
+      AG.turns.push({ role: 'assistant', content: r.say });
+    } catch (_) { AG.turns.pop(); r = faqAnswer(q); }
+  } else if (sampleFn) {
+    AG.turns.push({ role: 'user', content: `(客戶目前在：${curRoom()})\n${q}` });
+    const turns = AG.turns.slice(-8);
+    if (turns[0].role !== 'user') turns.shift();
+    try {
+      r = await sampleFn.json([{ role: 'user', content: RULES }, ...turns], { modelTier: 'quick', cache: false });
+      if (!r || typeof r.say !== 'string') throw { code: 'invalid_json' };
+      AG.turns.push({ role: 'assistant', content: r.say });
+    } catch (e) {
+      AG.turns.pop();
+      if (e && (e.code === 'not_granted' || e.code === 'sampling_disabled')) sampleFn = null;
+      r = faqAnswer(q);
+      if (e && e.code === 'rate_limited') r.say = '目前詢問的人比較多，請稍後再問我一次。' ;
+    }
+  } else r = faqAnswer(q);
+  AG.busy = false;
+  await say(r.say, r.gesture, r.chips && r.chips.length ? r.chips : ['附近有哪些學校', '交通方便嗎', '主臥有什麼特色']);
+  if (r.transfer) startTransfer();
+}
+$('agForm').onsubmit = (e) => { e.preventDefault(); ask($('agInput').value); };
+
+// 語音提問(瀏覽器支援時)
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+$('agMic').onclick = () => {
+  if (!SR) { agText.textContent = '這個瀏覽器不支援語音辨識，請用文字輸入，或改用 Chrome／Edge。'; return; }
+  if (rec) { rec.stop(); return; }
+  stopSpeak();
+  rec = new SR(); rec.lang = 'zh-TW'; rec.interimResults = true; rec.maxAlternatives = 1;
+  $('agMic').setAttribute('aria-pressed', 'true'); setGesture('think'); agText.textContent = '我在聽，請說…';
+  let finalText = '';
+  rec.onresult = (ev) => { let t = ''; for (const r of ev.results) { t += r[0].transcript; if (r.isFinal) finalText = t; } $('agInput').value = t; };
+  rec.onerror = (ev) => { agText.textContent = ev.error === 'not-allowed' || ev.error === 'service-not-allowed' ? '這個頁面沒有麥克風權限，請用文字輸入。自架網站開啟時可以用語音提問。' : '沒有聽清楚，請再說一次或用文字輸入。'; };
+  rec.onend = () => { $('agMic').setAttribute('aria-pressed', 'false'); rec = null; setGesture(null); const t = finalText || $('agInput').value; if (t.trim()) ask(t); };
+  try { rec.start(); } catch (_) { rec = null; $('agMic').setAttribute('aria-pressed', 'false'); }
+};
+
+function openAgent() {
+  if (document.pointerLockElement) document.exitPointerLock();
+  AG.open = true; $('agent').hidden = false; document.body.classList.add('ag-open');
+  if (L2D.app) L2D.app.ticker.start(); else initLive2D();
+  $('agent').classList.remove('in'); void $('agent').offsetWidth; $('agent').classList.add('in');
+  $('agBtn').setAttribute('aria-pressed', 'true');
+  const room = curRoom();
+  $('agWhere').textContent = '小昕 · 目前在 ' + room;
+  const hello = room === '俯視全戶'
+    ? '您好，我是秉和昕心的AI代銷小昕！這是A5戶3房2衛的格局，您可以點左邊的空間名稱進去看看，有任何問題都可以問我喔。'
+    : `您好，我是秉和昕心的AI代銷小昕！您現在在${room}，想了解這個空間、周邊學區交通，或未來捷運規劃，都可以問我喔。`;
+  say(hello, 'wave', [`介紹這個${room === '俯視全戶' ? '格局' : '空間'}`, '附近有哪些學校', '捷運規劃']);
+}
+function closeAgent() { AG.open = false; stopSpeak(); if (L2D.app) L2D.app.ticker.stop(); $('agent').hidden = true; document.body.classList.remove('ag-open'); $('agBtn').setAttribute('aria-pressed', 'false'); }
+$('agBtn').onclick = () => (AG.open ? closeAgent() : openAgent());
+$('agClose').onclick = closeAgent;
+setTimeout(initLive2D, 2500); // 背景先載入小晴模型
+// 走到新空間時，小昕更新所在位置
+let lastRoom = null;
+setInterval(() => {
+  if (mode !== 'walk') return;
+  const r = nearestRoom();
+  if (r !== lastRoom) { lastRoom = r; $('agWhere').textContent = '小昕 · 目前在 ' + r; if (AG.open && !AG.busy) setChips([`介紹${r}`, '附近有哪些學校', '交通方便嗎']); }
+}, 800);
+
+// 鳥瞰地圖（同一個網站的另一頁）
+$('mapBtn').onclick = () => { location.href = (window.SITE_PAGES && window.SITE_PAGES.map) || 'map/index.html'; };
+
+window.__viewer = { setPose: (p, l, fov) => { mode = 'walk'; const a = B(...p), b = B(...l); pos.copy(a); yaw = Math.atan2(-(b.x - a.x), -(b.z - a.z)); pitch = Math.atan2(b.y - a.y, Math.hypot(b.x - a.x, b.z - a.z)); if (fov) { camera.fov = fov; camera.updateProjectionMatrix(); } document.querySelectorAll('.hud,#cross,#joy').forEach((e) => (e.style.visibility = 'hidden')); }, setGod, setWalk, ROOMS, renderer, camera, lmMats, setLM: (k, e) => lmMats.forEach((m) => { m.lightMapIntensity = LM_MAX * k; if (e !== undefined && m.metalness <= 0.5 && m.envMap) m.envMapIntensity = e; }) };
+</script>
+</body></html>

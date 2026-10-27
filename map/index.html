@@ -1,0 +1,2694 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>秉和昕心 3D 鳥瞰</title>
+<style>
+  :root{
+    --navy:#14284b; --navy2:#1f3a66; --gray:#5b6573; --line:#d9dee5;
+    --card:rgba(255,255,255,.94); --accent:#c9a45c; --accent2:#b88f45;
+    --panel:rgba(255,255,255,.9); --panel2:#ffffff; --fg:#14284b; --muted:#5b6573;
+    --sans:"Noto Sans TC","Microsoft JhengHei","PingFang TC",sans-serif;
+  }
+  *{box-sizing:border-box}
+  [hidden]{display:none!important}
+  html,body{margin:0;height:100%;overflow:hidden;background:#cfd9e4;font-family:var(--sans);color:var(--navy)}
+  #c{position:fixed;inset:0;display:block}
+  .panel{position:fixed;background:var(--card);border-radius:14px;box-shadow:0 6px 24px rgba(20,40,75,.18);backdrop-filter:blur(6px)}
+  #title{top:16px;left:16px;padding:16px 20px;max-width:340px}
+  #title .brand{font-size:12px;letter-spacing:.25em;color:var(--accent);font-weight:700}
+  #title h1{margin:4px 0 2px;font-size:22px;letter-spacing:.06em}
+  #title .sub{font-size:13px;color:var(--gray);line-height:1.6}
+  #tools{top:16px;right:16px;padding:12px;display:flex;flex-direction:column;gap:8px;width:190px;max-height:calc(100vh - 32px);overflow:auto}
+  button{font:500 14px var(--sans);border:0;border-radius:9px;padding:10px 12px;cursor:pointer;background:#eef1f5;color:var(--navy);text-align:left;transition:.15s}
+  button:hover{background:#e0e6ee}
+  button.primary{background:var(--navy);color:#fff}
+  button.primary:hover{background:var(--navy2)}
+  button.gold{background:linear-gradient(180deg,#e7c987,var(--accent));color:#1d2533}
+  #tools button.on{outline:2px solid var(--accent)}
+  #tools .sep{height:1px;background:var(--line);margin:2px 0}
+  #legend{left:16px;bottom:16px;padding:12px 16px;font-size:12px;color:var(--gray);line-height:1.9}
+  #legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+  #hint{left:50%;transform:translateX(-50%);bottom:16px;padding:8px 14px;font-size:12px;color:var(--gray)}
+  body.ag-open #hint{display:none}
+  /* 景點照片卡（小昕介紹時出現在左側） */
+  #poiPhoto{left:16px;top:172px;width:min(440px,36vw);padding:10px 10px 12px;z-index:20;opacity:0;transform:translateX(-24px);transition:opacity .45s,transform .45s;pointer-events:none}
+  #shopCard{left:16px;top:172px;width:min(380px,36vw);padding:12px 12px 10px;z-index:21;opacity:0;transform:translateX(-24px);transition:opacity .4s,transform .4s;pointer-events:none;max-height:calc(100vh - 200px);overflow:auto}
+  #shopCard.show{opacity:1;transform:none;pointer-events:auto}
+  #shopCard h3{margin:2px 30px 8px 4px;font-size:16px;letter-spacing:.03em}
+  #shopCard .x{position:absolute;right:8px;top:8px;padding:4px 10px;background:#eef1f5}
+  #shopCard .it{display:flex;align-items:center;gap:8px;padding:8px 6px;border-top:1px solid var(--line);cursor:pointer;border-radius:8px}
+  #shopCard .it:hover{background:#f3f5f8}
+  #shopCard .it .no{flex:none;width:22px;height:22px;border-radius:50%;background:#d64541;color:#fff;font:700 12px/22px var(--sans);text-align:center}
+  #shopCard .it .tx{flex:1;min-width:0}
+  #shopCard .it .nm{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #shopCard .it .ds{font-size:12px;color:var(--gray)}
+  #shopCard .it a{flex:none;font:600 12px var(--sans);color:#fff;background:#2f6fb3;padding:6px 9px;border-radius:7px;text-decoration:none}
+  #shopCard .cr{font-size:10.5px;color:#8a919b;margin:8px 4px 0;line-height:1.5}
+  @media (max-width:760px){#shopCard{top:118px;width:58vw}}
+  #poiPhoto.show{opacity:1;transform:none;pointer-events:auto}
+  #poiPhoto img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;display:block;background:#e6e9ee}
+  #poiPhoto .nm{font-weight:700;font-size:18px;margin:10px 4px 2px;letter-spacing:.04em}
+  #poiPhoto .ds{font-size:13px;color:var(--gray);margin:0 4px 6px}
+  #poiPhoto .cr{font-size:10.5px;color:#8a919b;margin:0 4px}
+  @media (max-width:760px){#poiPhoto{top:118px;width:46vw}#poiPhoto .nm{font-size:15px}}
+  #card{left:50%;bottom:24px;transform:translateX(-50%);padding:18px 22px;width:min(420px,92vw);display:none;z-index:15}
+  #card h2{margin:0 0 6px;font-size:18px}
+  #card p{margin:0 0 12px;font-size:13px;color:var(--gray);line-height:1.7}
+  #card .row{display:flex;gap:8px}
+  #card .x{position:absolute;right:12px;top:10px;background:none;padding:4px 8px;font-size:18px}
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,#14284b,#2c4a78);color:#fff;z-index:40;flex-direction:column;gap:14px}
+  #loading .t{font-size:20px;letter-spacing:.12em}
+  #loading .m{font-size:13px;opacity:.85;min-height:20px;text-align:center;padding:0 20px}
+  #loading .bar{width:260px;height:4px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden}
+  #loading .bar div{height:100%;width:0;background:var(--accent);transition:width .3s}
+  .modal{position:fixed;inset:0;background:rgba(10,20,40,.45);display:none;align-items:center;justify-content:center;z-index:30}
+  .modal .box{background:#fff;border-radius:14px;padding:20px 22px;width:min(460px,92vw)}
+  .modal h3{margin:0 0 10px}
+  .modal label{font-size:13px;color:var(--gray);display:block;margin:10px 0 4px}
+  .modal input[type=text],.modal input[type=range]{width:100%}
+  .modal input[type=text]{padding:8px;border:1px solid var(--line);border-radius:8px;font-family:inherit}
+  .modal .row{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+  #toast{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:10px;font-size:14px;display:none;z-index:35}
+
+
+  /* ===== 深藍金色介面 ===== */
+  :root{--ui:rgba(12,26,52,.94);--ui2:#13284d;--uiLine:rgba(255,255,255,.12);--gold1:#ecd08f;--gold2:#c9a052;--uiText:#e9eef7;--uiMuted:#a9b6cc}
+  #side{position:fixed;left:12px;top:12px;bottom:12px;width:300px;background:var(--ui);border-radius:18px;box-shadow:0 10px 30px rgba(5,15,35,.35);color:var(--uiText);padding:26px 20px 14px;display:flex;flex-direction:column;z-index:12;overflow:auto;backdrop-filter:blur(8px)}
+  #side .brand{font-size:13px;letter-spacing:.28em;color:var(--gold1);font-weight:700}
+  #side .brand b{font-weight:400;color:var(--uiMuted);margin:0 2px}
+  #side h1{margin:12px 0 10px;font-size:28px;letter-spacing:.04em;color:#fff}
+  #side .addr{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--uiText);margin-bottom:20px}
+  #side .addr svg{width:17px;height:17px;flex:none}
+  .sbtn{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;border-radius:10px;font:600 18px var(--sans);margin-bottom:12px}
+  .sbtn svg{width:26px;height:26px;flex:none}
+  .sbtn svg:last-child{width:18px;height:18px;margin-left:auto}
+  .sbtn.gold{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1b2436;box-shadow:0 4px 14px rgba(201,160,82,.35)}
+  .sbtn.gold:hover{filter:brightness(1.05);background:linear-gradient(180deg,var(--gold1),var(--gold2))}
+  .sbtn.line{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.85)}
+  .sbtn.line:hover{background:rgba(255,255,255,.08)}
+  #side .hr{height:1px;background:var(--uiLine);margin:10px 0 14px}
+  #nav{display:flex;flex-direction:column;gap:4px}
+  #nav button{display:flex;align-items:center;gap:16px;background:transparent;color:var(--uiText);font:500 16px var(--sans);padding:12px 16px;border-radius:8px;border-left:3px solid transparent}
+  #nav button svg{width:22px;height:22px;flex:none}
+  #nav button:hover{background:rgba(255,255,255,.06)}
+  #nav button.act{background:rgba(255,255,255,.09);border-left-color:var(--gold2);color:var(--gold1)}
+  #legend{margin-top:auto;border:1px solid var(--uiLine);border-radius:12px;padding:12px 14px;font-size:13.5px;color:var(--uiText);line-height:2.15}
+  #legend i{display:inline-block;width:24px;height:12px;border-radius:3px;margin-right:14px;vertical-align:-1px}
+  #legend i.ln{height:2px;background:#fff;vertical-align:4px}
+  #legend .cr{font-size:12px;color:var(--uiMuted);line-height:1.6;margin-top:4px}
+  #rcol{position:fixed;right:14px;top:20px;width:180px;display:flex;flex-direction:column;gap:16px;z-index:12;max-height:calc(100vh - 40px)}
+  .rbox{display:flex;flex-direction:column;align-items:center;gap:8px;width:104px;align-self:flex-end;background:var(--ui);color:#fff;border-radius:14px;padding:16px 8px 12px;font:500 14px/1.35 var(--sans);text-align:center;box-shadow:0 8px 22px rgba(5,15,35,.3)}
+  .rbox:hover{background:var(--ui2)}
+  .rbox svg{width:30px;height:30px}
+  .rpanel{background:var(--ui);border-radius:14px;box-shadow:0 8px 22px rgba(5,15,35,.3);overflow:hidden}
+  .rstack{width:104px;align-self:flex-end;display:flex;flex-direction:column}
+  .rstack .rbox{box-shadow:none;border-radius:0;width:100%;background:transparent;padding:18px 8px 14px}
+  .rstack .rbox+.rbox{border-top:1px solid var(--uiLine)}
+  .rstack .rbox:hover{background:rgba(255,255,255,.06)}
+  .lhd{display:flex;align-items:center;justify-content:space-between;width:100%;background:transparent;color:#fff;font:700 17px var(--sans);padding:16px 18px 12px;border-radius:0}
+  .lhd:hover{background:rgba(255,255,255,.04)}
+  .lhd svg{width:18px;height:18px;transition:transform .2s}
+  #layers.closed .lhd svg{transform:rotate(180deg)}
+  #layers.closed .lbody{display:none}
+  .tg{display:flex;align-items:center;gap:10px;width:100%;background:transparent;color:var(--uiText);font:500 14.5px var(--sans);padding:13px 14px 13px 18px;border-radius:0;border-top:1px solid var(--uiLine)}
+  .tg:hover{background:rgba(255,255,255,.05)}
+  .tg svg{width:18px;height:18px;flex:none}
+  .tg .tA{width:18px;text-align:center;font-size:15px;flex:none}
+  .tg .sw{margin-left:auto;width:38px;height:22px;border-radius:12px;background:#3b4a66;position:relative;flex:none;transition:.2s}
+  .tg .sw::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:.2s}
+  .tg.on .sw{background:linear-gradient(180deg,var(--gold1),var(--gold2))}
+  .tg.on .sw::after{left:19px}
+  #viewBar{position:fixed;left:calc(50% + 150px);transform:translateX(-50%);bottom:14px;display:flex;align-items:center;gap:6px;background:var(--ui);border-radius:40px;padding:7px;box-shadow:0 8px 22px rgba(5,15,35,.35);z-index:12}
+  #viewBar .vl{color:#fff;font:500 15px var(--sans);padding:0 14px 0 18px}
+  #viewBar button{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);color:#fff;font:500 15px var(--sans);padding:11px 22px;border-radius:30px;border:1px solid rgba(255,255,255,.10)}
+  #viewBar button svg{width:20px;height:20px}
+  #viewBar button:hover{background:rgba(255,255,255,.1)}
+  #viewBar button.act,#viewBar button.on{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1b2436;border-color:transparent}
+  body.ag-open #viewBar{display:none}
+  body.ag-open .rstack{display:none}
+  #bMenu{display:none}
+  .help{margin:6px 0 0;padding-left:18px;font-size:14px;line-height:1.9;color:#33404f}
+  #shopCard,#poiPhoto{left:328px!important;top:16px!important}
+  #card{bottom:90px}
+  @media (max-width:1100px){#side{width:250px;padding:20px 16px 12px}#side h1{font-size:23px}.sbtn{font-size:16px;padding:12px 14px}#nav button{font-size:15px;padding:10px 14px}#legend{font-size:12.5px;line-height:1.95}#shopCard,#poiPhoto{left:276px!important}#viewBar{left:calc(50% + 125px)}#viewBar button{padding:9px 14px}}
+  @media (max-width:760px){
+    #bMenu{display:flex;position:fixed;left:12px;top:12px;z-index:14;width:44px;height:44px;padding:10px;border-radius:12px;background:var(--ui);color:#fff}
+    #bMenu svg{width:24px;height:24px}
+    #side{display:none;top:64px;width:min(300px,calc(100vw - 24px))}
+    body.menu-open #side{display:flex}
+    #rcol{width:150px;right:10px;top:12px;gap:10px}
+    .rbox,.rstack{width:84px}.rbox{font-size:12px;padding:10px 6px 8px}.rbox svg{width:24px;height:24px}
+    .tg{font-size:13px;padding:10px 10px 10px 12px}
+    #viewBar{left:50%;bottom:10px;padding:5px}#viewBar .vl{display:none}#viewBar button{padding:8px 12px;font-size:13px}
+    #shopCard,#poiPhoto{left:12px!important;top:64px!important}
+  }
+
+  .sbtn.gl{border-color:var(--gold1);color:var(--gold1)}
+  .modal .box.lead{width:min(440px,94vw)}
+  .modal .ls{margin:0 0 6px;color:#5b6573;font-size:13.5px}
+  .modal select,.modal input[type=text]{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font:inherit;background:#fff}
+  .modal .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .modal .ck{display:flex;gap:8px;align-items:flex-start;color:#33404f;margin-top:12px;line-height:1.5}
+  .modal .msg{min-height:20px;font-size:13px;margin-top:8px;color:#b23b3b}
+  .modal .msg.ok{color:#2f8f5b}
+  #qrBox{display:flex;justify-content:center;margin:8px 0}
+  #qrBox canvas,#qrBox img{width:220px;height:220px;image-rendering:pixelated}
+  .modal .url{font-size:12.5px;color:#33404f;word-break:break-all;text-align:center;background:#f3f5f8;border-radius:8px;padding:8px}
+  .sim{position:fixed;left:328px;bottom:14px;width:min(420px,calc(100vw - 560px));background:var(--ui);color:var(--uiText);border-radius:16px;padding:14px 16px 12px;z-index:13;box-shadow:0 8px 24px rgba(5,15,35,.35);font-size:14px}
+  .sim .sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:16px;color:#fff}
+  .sim .sh button{background:rgba(255,255,255,.1);color:#fff;padding:6px 12px;font-size:13px}
+  .sim .sr{display:flex;align-items:center;gap:10px;margin:8px 0}
+  .sim .sr>span{width:64px;flex:none;color:var(--uiMuted)}
+  .sim .sr input[type=range]{flex:1;accent-color:#d9b56a}
+  .sim .sr b{width:52px;text-align:right;color:var(--gold1)}
+  .sim .seg{display:flex;gap:4px;flex-wrap:wrap}
+  .sim .seg button{background:rgba(255,255,255,.07);color:#fff;padding:6px 10px;font-size:13px;border-radius:7px}
+  .sim .seg button.act{background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1b2436}
+  .sim .gbtn{flex:1;background:linear-gradient(180deg,var(--gold1),var(--gold2));color:#1b2436;font-weight:600;text-align:center}
+  .sim .gbtn.ln2{background:transparent;border:1.5px solid var(--gold1);color:var(--gold1)}
+  .sim .sinfo{background:rgba(255,255,255,.06);border-radius:8px;padding:8px 10px;line-height:1.6;font-size:13.5px}
+  .sim .note{font-size:11.5px;color:var(--uiMuted);margin-top:4px;line-height:1.5}
+  body.sim-on #viewBar{display:none}
+  @media (max-width:760px){.sim{left:10px;right:10px;width:auto}}
+  /* 小昕 */
+  #agent{position:fixed;z-index:25;right:14px;bottom:8px;display:flex;align-items:flex-end;gap:10px;pointer-events:none;max-width:calc(100% - 340px)}
+  #agent > *{pointer-events:auto}
+  #agent.in{animation:slideIn .55s cubic-bezier(.2,.9,.3,1.2) both}
+  @keyframes slideIn{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  #agPanel{width:min(400px,calc(100vw - 600px));display:grid;gap:8px;margin-bottom:24px}
+  #agTop{display:flex;justify-content:space-between;align-items:center;gap:6px}
+  #agTop span{font-size:11px;color:var(--muted);background:var(--panel);border-radius:4px;padding:3px 8px}
+  #agTop button{padding:4px 10px;font-size:12px;background:var(--panel)}
+  #agBubble{background:var(--panel2);border:1px solid var(--line);color:#1d2533;border-radius:14px 14px 4px 14px;padding:12px 14px;font-size:14.5px;line-height:1.65;box-shadow:0 6px 24px rgba(0,0,0,.18);max-height:34vh;overflow:auto;white-space:pre-wrap}
+  #agBubble .who{display:block;font-size:11px;letter-spacing:.12em;color:#8a7650;margin-bottom:2px;font-weight:700}
+  #agChips{display:flex;flex-wrap:wrap;gap:6px}
+  #agChips button{font-size:12px;padding:6px 10px;border-radius:16px;background:var(--panel);box-shadow:0 2px 8px rgba(20,40,75,.12)}
+  #agForm{display:flex;gap:6px}
+  #agForm input{flex:1;min-width:0;font:14px var(--sans);color:var(--fg);background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:9px 14px}
+  #agForm button{border-radius:20px;background:var(--panel2);border:1px solid var(--line)}
+  #agMic[aria-pressed="true"]{background:#c0605a;border-color:#c0605a;color:#fff}
+  #agTour[aria-pressed="true"]{background:#c0605a;color:#fff}
+  #l2dWrap{width:230px;height:330px;flex:none;filter:drop-shadow(0 8px 18px rgba(0,0,0,.28));-webkit-mask-image:linear-gradient(180deg,#000 86%,transparent 100%);mask-image:linear-gradient(180deg,#000 86%,transparent 100%)}
+  #l2d{width:100%;height:100%;display:block;cursor:pointer}
+  #agFallback{width:120px;height:120px;border-radius:50%;background:linear-gradient(180deg,#f3e7d4,#e9d3b3);display:grid;place-items:center;font-size:44px;font-weight:700;color:#4b3024;margin-bottom:30px;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+  #agent.l2d #agFallback{display:none}
+  #agent:not(.l2d) #l2dWrap{display:none}
+  @media (max-width:760px){#legend{display:none}#tools{width:160px}#l2dWrap{width:150px;height:220px}#agPanel{width:calc(100vw - 190px)}#agent{right:16px;max-width:calc(100% - 24px)}body.ag-open #tools{display:none}}
+</style>
+<script src="../live2d/lib/live2dcubismcore.min.js"></script>
+<script src="../live2d/lib/pixi.min.js"></script>
+<script src="../live2d/lib/cubism4.min.js"></script>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="loading">
+  <div class="t">秉和昕心 · 3D 鳥瞰地圖</div>
+  <div class="bar"><div id="pbar"></div></div>
+  <div class="m" id="pmsg">準備中…</div>
+</div>
+
+<button id="bMenu" type="button" aria-label="選單"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+<aside id="side">
+  <div class="brand">BING HE <b>×</b> XIN XIN</div>
+  <h1>秉和昕心 接待中心</h1>
+  <div class="addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>臺中市太平區祥順路一段11號</span></div>
+  <button class="sbtn gold" id="bAgent"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span>周邊介紹</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  <button class="sbtn line" id="bVR"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="7" width="19" height="10" rx="3.5"/><circle cx="8" cy="12" r="1.8"/><circle cx="16" cy="12" r="1.8"/><path d="M10.5 16.8l1.5-2 1.5 2"/></svg><span>進入 A5 戶 VR</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  <button class="sbtn line gl" id="bLead"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="M9 14.5l2 2 4-4"/></svg><span>預約賞屋</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+  <div class="hr"></div>
+  <nav id="nav">
+    <button class="act" data-k="pos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5h4v5"/></svg><span>專案位置</span></button>
+    <button data-k="poi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span>周邊設施</span></button>
+    <button data-k="traffic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16.5V12l2-5h10l2 5v4.5"/><path d="M3.5 12h17"/><rect x="3.5" y="12" width="17" height="5" rx="1.5"/><path d="M6.5 17v2M17.5 17v2"/><circle cx="7.5" cy="14.5" r=".6"/><circle cx="16.5" cy="14.5" r=".6"/></svg><span>交通動線</span></button>
+    <button data-k="life"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9h14l-1.2 11H6.2z"/><path d="M9 9V7a3 3 0 0 1 6 0v2"/><path d="M4 20.5h16"/></svg><span>生活機能</span></button>
+    <button data-k="school"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20.5h18"/><path d="M5 20.5V10l7-5 7 5v10.5"/><path d="M10 20.5v-5h4v5"/></svg><span>學區公園</span></button>
+    <button data-k="walk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="13" cy="4.5" r="1.8"/><path d="M10 21l2-6 3 3v3M9.5 11.5l2.5-3 3 2.5 2.5 1M12 8.5l-1 5"/></svg><span>步行生活圈</span></button>
+    <button data-k="future"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 11h12"/><circle cx="9" cy="14.5" r=".8"/><circle cx="15" cy="14.5" r=".8"/><path d="M8 21l2-3M16 21l-2-3"/></svg><span>未來建設</span></button>
+    <button data-k="view"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="1.5"/><path d="M12 4v14M3 11h18"/><path d="M8 21h8"/></svg><span>樓層景觀・日照</span></button>
+  </nav>
+  <div id="legend">
+    <div><i class="ln"></i>主要道路（含車道線）</div>
+    <div><i style="background:#8a8f98"></i>人行道</div>
+    <div><i style="background:#f1f1ee"></i>住宅建物</div>
+    <div><i style="background:#cfc7b8"></i>商業 / 公共建物</div>
+    <div><i style="background:#8fc47a"></i>公園綠地</div>
+    <div><i style="background:#4fb3e8"></i>河川水域</div>
+    <div><i style="background:#2f6fb3;height:6px"></i>周邊景點（點一下看介紹）</div>
+    <div><i style="background:#1d7fd1;width:14px;height:14px;margin-right:24px"></i>公車站牌（點一下看路線）</div>
+    <div><i style="background:rgba(63,191,127,.55);border:1.5px solid #2f9e67"></i>步行 5／10／15 分鐘範圍</div>
+    <div><i style="background:repeating-linear-gradient(90deg,#3b6fd8 0 6px,transparent 6px 10px);height:6px"></i>捷運藍線延伸（規劃中・未核定）</div>
+    <div class="cr">地圖資料 © OpenStreetMap 貢獻者</div>
+  </div>
+</aside>
+
+<div id="rcol">
+  <button class="rbox" id="bHome"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6.5"/><circle cx="12" cy="12" r="2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg><span>回到<br>接待中心</span></button>
+  <div class="rpanel" id="layers">
+    <button class="lhd" id="layHd" type="button"><span>圖層</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg></button>
+    <div class="lbody">
+      <button class="tg on" id="bRings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.2"/></svg><span>步行生活圈</span><i class="sw"></i></button>
+      <button class="tg on" id="bNames"><b class="tA">A</b><span>路名標示</span><i class="sw"></i></button>
+      <button class="tg on" id="bPois"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z" fill="currentColor" stroke="none"/></svg><span>景點標示</span><i class="sw"></i></button>
+      <button class="tg on" id="bCars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 16.5V12l2-5h10l2 5v4.5"/><path d="M3.5 12h17"/><rect x="3.5" y="12" width="17" height="5" rx="1.5"/><path d="M6.5 17v2M17.5 17v2"/><circle cx="7.5" cy="14.5" r=".6"/><circle cx="16.5" cy="14.5" r=".6"/></svg><span>車流</span><i class="sw"></i></button>
+      <button class="tg on" id="bBus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="3.5" width="14" height="14" rx="2.5"/><path d="M5 10h14"/><circle cx="8.5" cy="14" r=".7"/><circle cx="15.5" cy="14" r=".7"/><path d="M7.5 17.5v2.5M16.5 17.5v2.5"/></svg><span>公車站牌</span><i class="sw"></i></button>
+      <button class="tg on" id="bFac"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V9l8-5 8 5v11"/><path d="M9 20v-6h6v6"/></svg><span>生活設施</span><i class="sw"></i></button>
+      <button class="tg on" id="bFuture"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="15" rx="3"/><path d="M6 11h12"/><path d="M8 21l2-3M16 21l-2-3"/></svg><span>未來建設</span><i class="sw"></i></button>
+      <button class="tg on" id="bHQ"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg><span>高畫質</span><i class="sw"></i></button>
+    </div>
+  </div>
+  <div class="rpanel rstack">
+    <button class="rbox flat" id="bShare"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3M21 14v.01M17 21h4v-4M14 18v3"/></svg><span>分享 QR</span></button>
+    <button class="rbox flat" id="bSet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.8l1.6 2.3 2.7-.7.7 2.7 2.4 1.5-1.2 2.5 1.2 2.4-2.4 1.6-.7 2.6-2.7-.6L12 21.2l-1.6-2.3-2.7.6-.7-2.6-2.4-1.6L5.8 12 4.6 9.6 7 8.1l.7-2.7 2.7.7z"/></svg><span>設定</span></button>
+    <button class="rbox flat" id="bHelp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v6"/><circle cx="12" cy="7.6" r=".8" fill="currentColor"/></svg><span>使用說明</span></button>
+  </div>
+</div>
+
+<div id="viewBar">
+  <span class="vl">視角</span>
+  <button id="bTop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><span>俯視</span></button>
+  <button id="bBird" class="act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19h16"/><path d="M4 19L15 6"/><path d="M10 19a6 6 0 0 0-1.6-4.1"/></svg><span>45° 鳥瞰</span></button>
+  <button id="bOrbit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.4-5.7"/><path d="M20 4v4.5h-4.5"/></svg><span>自動環繞</span></button>
+</div>
+
+<div id="shopCard" class="panel" aria-live="polite"><button class="x" id="scX" type="button">✕</button><h3 id="scTitle"></h3><div id="scList"></div><div class="cr">店家資料 © OpenStreetMap 貢獻者（<span id="scUpd"></span>）・可能未完整收錄・「導航」會開啟 Google 地圖</div></div>
+<div id="poiPhoto" class="panel" aria-live="polite"><img id="ppImg" alt=""><div class="nm" id="ppName"></div><div class="ds" id="ppDist"></div><div class="cr" id="ppCr"></div></div>
+
+<div id="card" class="panel">
+  <button class="x" id="cardX">×</button>
+  <h2>秉和昕心 接待中心</h2>
+  <p>A5 戶 · 3 房格局<br>點選下方按鈕進入單戶 VR 實境導覽。</p>
+  <div class="row">
+    <button class="primary" id="cardVR">進入 A5 戶 VR</button>
+    <button id="cardClose">關閉</button>
+  </div>
+</div>
+
+<div id="agent" hidden>
+  <div id="agPanel">
+    <div id="agTop"><span id="agWhere">小昕 · 秉和昕心 AI 代銷</span><button id="agClose" type="button">收起</button></div>
+    <div id="agBubble" aria-live="polite"><span class="who">小昕</span><span id="agText"></span></div>
+    <div id="agChips"></div>
+    <form id="agForm"><button id="agMic" type="button" aria-pressed="false">語音</button><input id="agInput" placeholder="例如：附近有哪些景點？7-11 在哪？" autocomplete="off"><button id="agSend" type="submit">送出</button></form>
+  </div>
+  <div id="l2dWrap"><canvas id="l2d" aria-label="AI 代銷人員小昕"></canvas></div>
+  <div id="agFallback">昕</div>
+</div>
+
+<div class="modal" id="mSet"><div class="box">
+  <h3>設定</h3>
+  <label>A5 戶 VR 網頁位置（網址或路徑）</label>
+  <input type="text" id="vrUrl">
+  <label>分享用網址（放上雲端後填雲端網址，QR Code 會用這個）</label>
+  <input type="text" id="shareUrl" placeholder="例如 https://www.shancai-vr.com/binghe-map/">
+  <label>大樓模型旋轉角度：<span id="rotV">0</span>°</label>
+  <input type="range" id="rot" min="-180" max="180" step="1" value="0">
+  <label>大樓模型縮放：<span id="sclV">1</span>×</label>
+  <input type="range" id="scl" min="0.1" max="3" step="0.01" value="1">
+  <label>其他工具</label>
+  <div class="row" style="justify-content:flex-start;margin-top:4px">
+    <button id="bModel">🏢 載入大樓模型</button>
+    <button id="bFix">✥ 校正中心點</button>
+  </div>
+  <div class="row">
+    <button id="bShops">更新周邊店家</button>
+    <button id="bRedl">重新下載地圖資料</button>
+    <button class="primary" id="setOK">完成</button>
+  </div>
+</div></div>
+
+<div class="modal" id="mLead"><div class="box lead">
+  <h3>預約賞屋</h3>
+  <p class="ls">留下聯絡方式，專人會盡快與您聯繫安排賞屋。</p>
+  <label>姓名 *</label><input type="text" id="ldName" autocomplete="name">
+  <label>電話 *</label><input type="text" id="ldPhone" inputmode="tel" autocomplete="tel">
+  <label>LINE ID（選填）</label><input type="text" id="ldLine">
+  <div class="two"><div><label>方便聯絡時段</label><select id="ldTime"><option>不限</option><option>平日白天</option><option>平日晚上</option><option>假日</option></select></div>
+  <div><label>需求房型</label><select id="ldRooms"><option>未定</option><option>1 房</option><option>2 房</option><option>3 房</option></select></div></div>
+  <label>備註（選填）</label><input type="text" id="ldNote" placeholder="例如：想看 A5 戶、希望週六下午">
+  <label class="ck"><input type="checkbox" id="ldOK"> 我同意秉和昕心使用以上資料與我聯繫賞屋事宜</label>
+  <div class="msg" id="ldMsg"></div>
+  <div class="row"><button id="ldCancel">取消</button><button class="primary" id="ldSend">送出預約</button></div>
+</div></div>
+<div class="modal" id="mShare"><div class="box share">
+  <h3>分享地圖</h3>
+  <p class="ls">手機掃描 QR Code 即可開啟這個 3D 鳥瞰地圖。</p>
+  <div id="qrBox"></div>
+  <div class="url" id="shUrl"></div>
+  <div class="msg" id="shMsg"></div>
+  <div class="row"><button id="shCopy">複製連結</button><button id="shDl">下載 QR 圖（印 DM 用）</button><button class="primary" id="shOK">完成</button></div>
+</div></div>
+<div id="simPanel" class="sim" hidden>
+  <div class="sh"><b>樓層景觀・日照模擬</b><button id="simX" type="button">✕ 結束</button></div>
+  <div class="sr"><span>樓層</span><input type="range" id="simFloor" min="2" max="18" value="8"><b id="simFloorV">8F</b></div>
+  <div class="sr"><span>窗戶方向</span><div class="seg" id="simDir"><button data-d="S" class="act">南・面河</button><button data-d="E">東</button><button data-d="W">西</button><button data-d="N">北</button></div></div>
+  <div class="sr"><span>季節</span><div class="seg" id="simSeason"><button data-s="80">春分</button><button data-s="172">夏至</button><button data-s="266">秋分</button><button data-s="356" class="act">冬至</button></div></div>
+  <div class="sr"><span>時間</span><input type="range" id="simHour" min="6" max="18.5" step="0.25" value="15"><b id="simHourV">15:00</b></div>
+  <div class="sinfo" id="simInfo"></div>
+  <div class="sr"><button id="simLook" class="gbtn">看窗外景觀</button><button id="simOut" class="gbtn ln2">看整棟日照</button></div>
+  <div class="note">樓層高度依模型估算，實際以建商圖說為準；日照為理論太陽位置，不含天候。</div>
+</div>
+<div class="modal" id="mHelp"><div class="box">
+  <h3>使用說明</h3>
+  <ul class="help">
+    <li><b>移動地圖</b>：滑鼠左鍵拖曳（觸控：單指拖曳）</li>
+    <li><b>旋轉視角</b>：滑鼠右鍵拖曳（觸控：雙指旋轉）</li>
+    <li><b>拉近拉遠</b>：滾輪（觸控：雙指縮放）</li>
+    <li><b>景點介紹</b>：點地圖上的藍色景點，小昕會飛過去介紹</li>
+    <li><b>問小昕</b>：按「周邊介紹」，可以打字或用語音問，例如「附近有哪些景點」「7-11 在哪裡」「附近有五金行嗎」</li>
+    <li><b>左側選單</b>：一鍵看周邊設施、交通動線、生活機能、學區公園</li>
+    <li><b>公車站牌</b>：拉近地圖會出現藍色公車圖示，點一下看站名與經過的路線</li>
+    <li><b>步行生活圈</b>：綠／金／藍色範圍是沿真實道路走 5／10／15 分鐘到得了的地方</li>
+    <li><b>樓層景觀・日照</b>：選樓層與窗戶方向看窗外，選季節與時間看陽光與陰影</li>
+    <li><b>預約賞屋</b>：左側按鈕留下聯絡方式；<b>分享 QR</b>：右側按鈕產生 QR Code</li>
+    <li><b>右側圖層</b>：開關距離圈、路名、景點、公車站牌、車流與高畫質</li>
+  </ul>
+  <div class="row"><button class="primary" id="helpOK">知道了</button></div>
+</div></div>
+<div id="toast"></div>
+<input type="file" id="fModel" accept=".glb,.gltf" style="display:none">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script type="importmap">
+{"imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+}}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { MapControls } from 'three/addons/controls/MapControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import * as BGU from 'three/addons/utils/BufferGeometryUtils.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
+import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { Sky } from 'three/addons/objects/Sky.js';
+
+/* ================== 基本設定 ================== */
+const RADIUS = 1500;        // 細節範圍：人行道、車道線、完整房屋外形
+const FETCH_IN = 1800;      // 完整房屋外形下載範圍
+const R_OUT = 3500;         // 外圍範圍：主要道路＋簡化方塊房屋
+const FETCH_OUT = 3700;
+const MAX_FLOORS = 10, FLOOR_H = 3.2;
+const DATA_VER = 3;
+const SALES_CENTER = { lat: 24.1358275, lon: 120.7128994 }; // 取自 Google 地圖「秉和昕心 - 接待中心」
+const OVERPASS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.private.coffee/api/interpreter'
+];
+const API = '../api/';   // 與 A5 戶網頁共用同一個伺服器（開啟鳥瞰地圖.bat）
+const LS = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let VR_URL = LS.get('vrUrl', '../index.html');
+const served = location.protocol.startsWith('http');
+
+/* ================== 周邊景點（可用 map/pois.json 修改） ================== */
+// osm：用名稱在地圖資料裡找座標；lat/lon：直接指定座標。intro 裡的 {d} 會換成距離。
+const DEFAULT_POIS = [
+  { id:'lalaport', name:'三井 LaLaport 台中', lat:24.135003, lon:120.692271, alias:['lalaport','拉拉','啦啦','ララ','三井','百貨','逛街'],
+    intro:'三井LaLaport台中是台灣第一座LaLaport，2023年開幕，南北兩館大約有300家店，南館集合了全台最多的日系專門店，北館有親子購物區。它就在台中車站旁邊，跟我們接待中心{d}。' },
+  { id:'xiangshun_park', name:'祥順運動公園', osm:'祥順.*公園', alias:['祥順','運動公園','公園','綠地'],
+    intro:'接待中心旁邊就是祥順運動公園，大片綠地加上宜昌棒球場，散步、慢跑、帶小朋友放電都很方便，{d}，幾乎就像社區的後花園。' },
+  { id:'dongying_park', name:'東英公園', osm:'^東英公園', alias:['東英'],
+    intro:'東英公園就在台74旁邊，和祥順運動公園連成一大片綠帶，{d}，假日帶家人走走很舒服。' },
+  { id:'buzi', name:'廍子溪', lat:24.13495, lon:120.71330, alias:['廍子溪','溪邊','河岸','河景'],
+    intro:'接待中心正前方就是廍子溪，河岸視野開闊、前方沒有建築遮擋，沿著河岸散步或騎腳踏車都很舒服。' },
+  { id:'hwy74', name:'台74 太平交流道', osm:'太平交流道', alias:['74','快速道路','交流道','開車'],
+    intro:'從這裡上台74線快速道路，可以串聯台中市區，形成環台中生活圈。交流道{d}，往市區或其他區都很快。' },
+  { id:'xinguang_jh', name:'新光國中', osm:'新光國(民)?中', alias:['新光國中','國中'],
+    intro:'這是新光國中，{d}，孩子上學很方便。實際學區還是以教育局公告為準，需要的話我請專人提供學區資料給您。' },
+  { id:'xinguang_es', name:'新光國小', osm:'新光國(民)?小', alias:['新光國小','國小'],
+    intro:'這是新光國小，{d}，小朋友上學接送很方便。實際學區以教育局公告為準喔。' },
+  { id:'carrefour', name:'家樂福商圈', osm:'家樂福', alias:['家樂福','買菜','採買','商圈'],
+    intro:'這一帶是家樂福商圈，餐廳、商家和日常採買都很集中，{d}，生活機能很方便。' },
+  { id:'jingwu', name:'台鐵精武車站', osm:'精武(車)?站', alias:['精武','火車','台鐵','車站'],
+    intro:'這是台鐵精武車站，{d}，搭火車往台中車站或其他城市都很方便。' },
+  { id:'pinglin', name:'坪林森林公園', osm:'坪林森林公園', alias:['坪林','森林公園'],
+    intro:'這是坪林森林公園，{d}，是太平很受歡迎的大型綠地，假日散步、野餐都很適合。' },
+  { id:'taiping_sports', name:'太平運動場', osm:'太平.*運動場', alias:['運動場','體育場'],
+    intro:'這是太平運動場一帶，{d}，運動、散步都很方便。' }
+];
+let POIS = DEFAULT_POIS;
+
+/* ================== 小工具 ================== */
+const $ = id => document.getElementById(id);
+const pmsg = (t, p) => { $('pmsg').textContent = t; if (p != null) $('pbar').style.width = p + '%'; };
+const toast = (t, ms = 2600) => { const e = $('toast'); e.textContent = t; e.style.display = 'block';
+  clearTimeout(toast._t); toast._t = setTimeout(() => e.style.display = 'none', ms); };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function rnd(seed){ let s = (seed * 2654435761) % 4294967296; return () => { s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; }; }
+
+const idb = {
+  open(){ return new Promise((res, rej) => { try{
+    const r = indexedDB.open('binghe-map', 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('kv');
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }catch(e){ rej(e); } }); },
+  async get(k){ try{ const db = await this.open(); return await new Promise(res => {
+    const q = db.transaction('kv').objectStore('kv').get(k); q.onsuccess = () => res(q.result); q.onerror = () => res(null); });
+  }catch(e){ return null; } },
+  async set(k, v){ try{ const db = await this.open(); db.transaction('kv', 'readwrite').objectStore('kv').put(v, k); }catch(e){} }
+};
+
+// 三台地圖伺服器同時發出，誰先回傳完整資料就用誰
+async function overpass(query, label, timeoutMs = 240000){
+  const t0 = Date.now();
+  const tick = setInterval(() => pmsg(`${label}（已等待 ${Math.round((Date.now() - t0) / 1000)} 秒）`), 1000);
+  pmsg(label);
+  const one = async url => {
+    const r = await fetch(url, { method:'POST', body:'data=' + encodeURIComponent(query),
+      headers:{ 'Content-Type':'application/x-www-form-urlencoded' } });
+    if (!r.ok) throw new Error(new URL(url).host + ' 回應 ' + r.status);
+    const j = await r.json();
+    if (!j.elements) throw new Error(new URL(url).host + ' 資料不完整');
+    return j;
+  };
+  let tm;
+  try{
+    return await Promise.race([
+      Promise.any(OVERPASS.map(one)),
+      new Promise((_, rej) => { tm = setTimeout(() => rej(new Error('地圖伺服器回應逾時')), timeoutMs); })
+    ]);
+  }catch(e){
+    throw (e instanceof AggregateError) ? new Error('三台地圖伺服器都無法連線') : e;
+  }finally{ clearInterval(tick); clearTimeout(tm); }
+}
+
+// 分段下載：每個區塊輪流交給不同伺服器，失敗就換下一台
+const SERVERS = [...OVERPASS, 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+let srvRot = 0;
+async function fetchChunk(query, timeoutMs = 100000){
+  const start = srvRot++;
+  let last;
+  for (let i = 0; i < SERVERS.length * 2; i++){
+    const url = SERVERS[(start + i) % SERVERS.length];
+    try{
+      let tm;
+      const j = await Promise.race([
+        (async () => {
+          const r = await fetch(url, { method:'POST', body:'data=' + encodeURIComponent(query),
+            headers:{ 'Content-Type':'application/x-www-form-urlencoded' } });
+          if (!r.ok) throw new Error(new URL(url).host + ' 回應 ' + r.status);
+          return r.json();
+        })(),
+        new Promise((_, rej) => { tm = setTimeout(() => rej(new Error('逾時')), timeoutMs); })
+      ]).finally(() => clearTimeout(tm));
+      if (!j || !j.elements) throw new Error('資料不完整');
+      if (j.remark && /runtime error|timed out|out of memory|Query run out/i.test(j.remark)) throw new Error('伺服器處理逾時');
+      return j;
+    }catch(e){ last = e; if (i >= SERVERS.length - 1) await sleep(1500); }
+  }
+  throw last || new Error('無法下載');
+}
+async function overpassChunks(queries, label){
+  const t0 = Date.now(), out = [];
+  let done = 0, idx = 0;
+  const show = () => pmsg(`${label}（已完成 ${done} / ${queries.length} 區塊，已等待 ${Math.round((Date.now() - t0) / 1000)} 秒）`, 20 + 24 * done / queries.length);
+  const tick = setInterval(show, 1000); show();
+  try{
+    const worker = async () => { while (idx < queries.length){ const k = idx++; out[k] = await fetchChunk(queries[k]); done++; show(); } };
+    await Promise.all([worker(), worker(), worker()]);
+  }finally{ clearInterval(tick); }
+  return { elements: out.flatMap(j => j.elements) };
+}
+
+/* ================== 場景 ================== */
+// 畫質：電腦預設高畫質（陰影＋環境遮蔽），手機自動降低
+const MOBILE = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || Math.min(innerWidth, innerHeight) < 700;
+let HQ = LS.get('hq', !MOBILE);
+const renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true, logarithmicDepthBuffer: false });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#cfdbe8');
+scene.fog = new THREE.Fog('#dce5ee', 3500, 9500);   // 遠景空氣感
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth / innerHeight, 1, 60000);
+camera.position.set(2600, 3200, 3600);
+const controls = new MapControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.minDistance = 40; controls.maxDistance = 9000;
+controls.maxPolarAngle = Math.PI * 0.46;
+controls.screenSpacePanning = false;
+controls.zoomToCursor = true;
+
+scene.add(new THREE.HemisphereLight('#ffffff', '#b9b2a2', 1.1));
+const sun = new THREE.DirectionalLight('#fff4e2', 2.2);
+sun.position.set(-900, 1400, 700);
+sun.castShadow = true;
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -1900, right: 1900, top: 1900, bottom: -1900, near: 100, far: 4000 });
+sun.shadow.bias = -0.0003; sun.shadow.normalBias = 0.5;
+scene.add(sun); scene.add(sun.target);
+
+/* 天空（物理天空，與太陽方向一致）＋給水面反射用的環境貼圖 */
+const SUN_DIR = new THREE.Vector3(-900, 1400, 700).normalize();
+/* 看得到的天空：藍天漸層＋會慢慢飄動的白雲（程式產生，不用額外貼圖） */
+const SKY_U = { uTime: { value: 0 }, uSun: { value: SUN_DIR.clone() } };
+const sky = new THREE.Mesh(new THREE.SphereGeometry(40000, 48, 24), new THREE.ShaderMaterial({
+  uniforms: SKY_U, side: THREE.BackSide, depthWrite: false, fog: false, toneMapped: false,
+  vertexShader: `varying vec3 vDir; void main(){ vDir = position; vec4 p = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * p; gl_Position.z = gl_Position.w * 0.99999; }`,
+  fragmentShader: `
+    uniform float uTime; uniform vec3 uSun; varying vec3 vDir;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+    float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+      return mix(mix(h(i), h(i + vec2(1, 0)), f.x), mix(h(i + vec2(0, 1)), h(i + vec2(1, 1)), f.x), f.y); }
+    float fbm(vec2 p){ float v = 0.0, a = 0.5; for (int k = 0; k < 6; k++){ v += a * n(p); p = p * 2.03 + vec2(1.7, 9.2); a *= 0.5; } return v; }
+    void main(){
+      vec3 d = normalize(vDir);
+      float y = max(d.y, 0.0);
+      // 藍天：天頂深藍 → 地平線淡藍白
+      vec3 zen = vec3(0.10, 0.33, 0.78), hor = vec3(0.50, 0.70, 0.93);
+      vec3 col = mix(hor, zen, pow(smoothstep(0.0, 0.40, y), 0.55));
+      col = mix(vec3(0.78, 0.86, 0.95), col, smoothstep(0.0, 0.05, y));
+      // 太陽附近的光暈
+      float sd = max(dot(d, normalize(uSun)), 0.0);
+      col += vec3(1.0, 0.92, 0.75) * (pow(sd, 400.0) * 1.5 + pow(sd, 18.0) * 0.18);
+      // 白雲：投影到高空的雲層平面
+      if (d.y > 0.0){
+        vec2 uv = d.xz / (d.y + 0.10) * 2.2 + vec2(uTime * 0.012, uTime * 0.005);
+        float c = fbm(uv) * 0.75 + fbm(uv * 3.1 + 4.0) * 0.25;
+        float cover = smoothstep(0.47, 0.66, c);
+        float shade = smoothstep(0.50, 0.95, fbm(uv * 1.3 + vec2(0.35, 0.25)));   // 雲底陰影
+        vec3 cc = mix(vec3(1.0), vec3(0.74, 0.79, 0.86), shade * 0.7);
+        cc += vec3(1.0, 0.95, 0.85) * pow(sd, 8.0) * 0.25;
+        float fade = smoothstep(0.008, 0.06, d.y);
+        col = mix(col, cc, cover * fade * 0.95);
+      }
+      // 地平線融入遠景霧色
+      col = mix(vec3(0.862, 0.898, 0.933), col, smoothstep(-0.02, 0.015, d.y));
+      gl_FragColor = vec4(col, 1.0);
+    }`
+}));
+sky.frustumCulled = false; sky.renderOrder = -10;
+scene.add(sky); scene.background = null;
+{
+  const pm = new THREE.PMREMGenerator(renderer); const sk = new THREE.Scene(); const s2 = new Sky(); s2.scale.setScalar(1000);
+  Object.assign(s2.material.uniforms.turbidity, { value: 3.2 }); s2.material.uniforms.rayleigh.value = 1.4;
+  s2.material.uniforms.mieCoefficient.value = 0.004; s2.material.uniforms.mieDirectionalG.value = 0.82;
+  s2.material.uniforms.sunPosition.value.copy(SUN_DIR); sk.add(s2);
+  scene.environment = pm.fromScene(sk, 0, 1, 2000).texture; pm.dispose();
+}
+/* 後製特效：環境遮蔽（牆角、建築縫隙變暗）＋反鋸齒 */
+let composer = null, gtao = null;
+function setupComposer(){
+  composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
+  gtao.output = GTAOPass.OUTPUT.Default; gtao.blendIntensity = 1.0;
+  gtao.updateGtaoMaterial({ radius: 5, distanceExponent: 1.6, thickness: 3, scale: 1.2, samples: 12 });
+  gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 6, rings: 2, samples: 12 });
+  // 標籤不參與環境遮蔽計算
+  const orig = gtao.render.bind(gtao);
+  gtao.render = (...a) => { const hide = [namesGroup, poiGroup, markerGroup, ringsGroup, routeGroup, shopGroup, hwyGroup, busGroup, facGroup, walkLabels, commuteGroup, futureGroup]; const v = hide.map(g => g.visible); hide.forEach(g => g.visible = false); orig(...a); hide.forEach((g, i) => g.visible = v[i]); };
+  composer.addPass(gtao);
+  composer.addPass(new OutputPass());
+  composer.addPass(new SMAAPass(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio()));
+}
+function applyQuality(){
+  gtao && (gtao.enabled = HQ);
+  renderer.shadowMap.enabled = true;
+  sun.castShadow = true;
+  const ms = HQ ? 4096 : 2048;
+  if (sun.shadow.mapSize.x !== ms){ sun.shadow.mapSize.set(ms, ms); if (sun.shadow.map){ sun.shadow.map.dispose(); sun.shadow.map = null; } }
+  const b = document.getElementById('bHQ'); if (b){ b.classList.toggle('on', HQ); }
+}
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (composer) composer.setSize(innerWidth, innerHeight);
+});
+
+let C = null, KX = 1, KY = 1;
+function setProjection(c){ C = c; KY = 6378137 * Math.PI / 180; KX = KY * Math.cos(c.lat * Math.PI / 180); }
+const px = p => (p.lon - C.lon) * KX;
+const pn = p => (p.lat - C.lat) * KY;   // 向北公尺（場景中 z = -向北）
+
+const world = new THREE.Group(); scene.add(world);
+const ringsGroup = new THREE.Group(); scene.add(ringsGroup);
+const namesGroup = new THREE.Group(); scene.add(namesGroup);
+const markerGroup = new THREE.Group(); scene.add(markerGroup);
+const poiGroup = new THREE.Group(); scene.add(poiGroup);
+const routeGroup = new THREE.Group(); scene.add(routeGroup);
+const shopGroup = new THREE.Group(); scene.add(shopGroup);
+const hwyGroup = new THREE.Group(); scene.add(hwyGroup);   // 台74 紅線＋路牌
+
+// 直式標籤：中文由上往下，英文數字轉 90 度
+function vTextSprite(text, opt = {}){
+  const fs = opt.size || 56, pad = 20, font = `700 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+  const cv = document.createElement('canvas'), ctx = cv.getContext('2d'); ctx.font = font;
+  const toks = [];
+  for (const m of text.matchAll(/[A-Za-z0-9.\-]+|\S/g)){
+    const t = m[0], latin = /^[A-Za-z0-9.\-]{2,}$/.test(t) && !/^\d{1,3}$/.test(t);   // 短數字（如 74）正立橫排
+    toks.push({ t, latin, h: latin ? ctx.measureText(t).width + fs * 0.25 : fs * 1.08 });
+  }
+  const w = Math.round(fs + pad * 1.6), h = Math.round(toks.reduce((a, k) => a + k.h, 0) + pad * 1.6);
+  cv.width = w; cv.height = h; ctx.font = font;
+  ctx.fillStyle = opt.bg || 'rgba(20,40,75,.88)';
+  ctx.beginPath(); ctx.roundRect(0, 0, w, h, w / 2); ctx.fill();
+  ctx.fillStyle = opt.color || '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  let y = pad * 0.8;
+  for (const k of toks){
+    if (k.latin){ ctx.save(); ctx.translate(w / 2, y + k.h / 2); ctx.rotate(Math.PI / 2); ctx.fillText(k.t, 0, 2); ctx.restore(); }
+    else ctx.fillText(k.t, w / 2, y + k.h / 2 + 2);
+    y += k.h;
+  }
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: opt.depthTest ?? true, transparent: true }));
+  sp.center.set(0.5, 0);   // 底部對齊立柱頂端
+  const f = opt.fixed || 0.0004; sp.material.sizeAttenuation = false; sp.scale.set(w * f, h * f, 1);
+  return sp;
+}
+function textSprite(text, opt = {}){
+  const fs = opt.size || 56, pad = 22;
+  const cv = document.createElement('canvas'), ctx = cv.getContext('2d');
+  ctx.font = `700 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+  const w = Math.ceil(ctx.measureText(text).width) + pad * 2, h = fs + pad * 1.4;
+  cv.width = w; cv.height = h;
+  ctx.font = `700 ${fs}px "Noto Sans TC","Microsoft JhengHei",sans-serif`;
+  ctx.fillStyle = opt.bg || 'rgba(20,40,75,.88)';
+  ctx.beginPath(); ctx.roundRect(0, 0, w, h, h / 2); ctx.fill();
+  ctx.fillStyle = opt.color || '#fff'; ctx.textBaseline = 'middle'; ctx.fillText(text, pad, h / 2 + 2);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, depthTest: opt.depthTest ?? true, transparent: true }));
+  const s = opt.scale || 0.5; sp.scale.set(w * s, h * s, 1);
+  if (opt.fixed){ sp.material.sizeAttenuation = false; sp.scale.set(w * opt.fixed, h * opt.fixed, 1); }
+  return sp;
+}
+
+function buildGround(){
+  const cv = document.createElement('canvas'); cv.width = cv.height = 1024;
+  const g = cv.getContext('2d');
+  const grd = g.createRadialGradient(512, 512, 0, 512, 512, 512);
+  grd.addColorStop(0, '#e9e6dc'); grd.addColorStop(0.88, '#e2dfd4'); grd.addColorStop(0.95, '#d6dccf'); grd.addColorStop(1, '#cfdbe8');
+  g.fillStyle = grd; g.fillRect(0, 0, 1024, 1024);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace;
+  const m = new THREE.Mesh(new THREE.CircleGeometry(R_OUT * 1.12, 160), new THREE.MeshStandardMaterial({ map: tex, roughness: 1 }));
+  m.rotation.x = -Math.PI / 2; m.receiveShadow = true;
+  world.add(m);
+}
+
+function buildRings(){
+  ringsGroup.clear();
+  if (WALK){ buildWalk(); return; }
+  for (const r of [500, 1000, 1500, 2000, 3000]){
+    const wdt = r >= 2000 ? 5 : 2.5;
+    const ring = new THREE.Mesh(new THREE.RingGeometry(r - wdt, r + wdt, 200),
+      new THREE.MeshBasicMaterial({ color: r === 1500 ? '#c9a45c' : '#1f3a66', transparent: true, opacity: .55, depthWrite: false }));
+    ring.rotation.x = -Math.PI / 2; ring.position.y = 0.6; ring.renderOrder = 5;
+    ringsGroup.add(ring);
+    const lab = textSprite(r >= 1000 ? (r / 1000) + ' 公里' : r + ' 公尺', { size: 44, scale: r >= 2000 ? 1.6 : 0.9, bg: 'rgba(201,164,92,.92)' });
+    lab.position.set(r * 0.707, 20, r * 0.707); ringsGroup.add(lab);
+  }
+}
+
+let pulse, placeholder;
+function buildMarker(){
+  markerGroup.clear();
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 160, 24, 1, true),
+    new THREE.MeshBasicMaterial({ color: '#c9a45c', transparent: true, opacity: .55, depthWrite: false }));
+  beam.position.y = 80; beam.userData.click = 'center'; markerGroup.add(beam);
+  pulse = new THREE.Mesh(new THREE.RingGeometry(10, 14, 64),
+    new THREE.MeshBasicMaterial({ color: '#c9a45c', transparent: true, opacity: .9, depthWrite: false }));
+  pulse.rotation.x = -Math.PI / 2; pulse.position.y = 0.8; markerGroup.add(pulse);
+  // 與景點標籤一樣固定螢幕大小，大 10%；永遠顯示在最前面
+  const lab = vTextSprite('秉和昕心接待中心', { size: 50, fixed: 0.00042 * 1.1, depthTest: false });
+  lab.renderOrder = 30; lab.position.y = 165; lab.userData.click = 'center'; markerGroup.add(lab);
+  placeholder = new THREE.Mesh(new THREE.BoxGeometry(32, 48, 32),
+    new THREE.MeshStandardMaterial({ color: '#7fb3e0', transparent: true, opacity: .35, roughness: .2, metalness: .1 }));
+  placeholder.position.y = 24; placeholder.userData.click = 'center';
+  placeholder.add(new THREE.LineSegments(new THREE.EdgesGeometry(placeholder.geometry), new THREE.LineBasicMaterial({ color: '#1f3a66' })));
+  markerGroup.add(placeholder);
+  if (MAIN_BLDG) placeholder.visible = false;
+}
+
+/* ================== 建物 ================== */
+const TYPE_COLOR = {
+  res: ['#ebe6dc', '#e3dccf', '#d9d3c8', '#e6e2da', '#d6cfc2', '#dfdad3'],
+  com: ['#b8c5d3', '#c3ccd6', '#aebccb'],
+  ind: ['#c9c4b8', '#bfbcb2'],
+  edu: ['#e8d6b5', '#e2cfa8'],
+  rel: ['#d9b48f']
+};
+const CLS = ['res', 'com', 'ind', 'edu', 'rel'];
+function classify(t){
+  const b = t.building || 'yes';
+  if (/^(commercial|retail|office|hotel|supermarket|hospital|public|civic|government|train_station)$/.test(b) || t.shop || t.amenity === 'hospital') return 'com';
+  if (/^(industrial|warehouse|factory|manufacture|garage|garages|shed|roof|carport|hangar)$/.test(b)) return 'ind';
+  if (/^(school|university|college|kindergarten)$/.test(b) || /school|university|college|kindergarten/.test(t.amenity || '')) return 'edu';
+  if (/^(temple|church|shrine|chapel)$/.test(b) || t.amenity === 'place_of_worship') return 'rel';
+  return 'res';
+}
+function floorsFor(t, area, id, cls){
+  const r = rnd(id);
+  let f = parseFloat(t['building:levels']);
+  if (!(f > 0)){ const h = parseFloat(t.height); if (h > 0) f = h / FLOOR_H; }
+  if (!(f > 0)){
+    if (cls === 'ind') f = area > 800 ? 2 : 1.4;
+    else if (cls === 'rel') f = 1.5 + r();
+    else if (cls === 'edu') f = 3 + Math.round(r() * 2);
+    else if (/^(house|detached|terrace|semidetached_house)$/.test(t.building || '')) f = 3 + Math.round(r() * 1);
+    else if (area < 60) f = 1 + Math.round(r() * 2);
+    else if (area < 160) f = 3 + Math.round(r() * 2);   // 透天厝
+    else if (area < 600) f = 4 + Math.round(r() * 3);
+    else f = 6 + Math.round(r() * 4);
+  }
+  return Math.max(1, Math.min(MAX_FLOORS, f));
+}
+function polyArea(pts){ let a = 0; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) a += (pts[j].x + pts[i].x) * (pts[j].y - pts[i].y); return Math.abs(a / 2); }
+
+let centerBldMesh = null;
+async function buildBuildings(elements){
+  const items = [];
+  for (const e of elements){
+    if (!e.tags || !e.tags.building) continue;
+    let ring = null;
+    if (e.type === 'way' && e.geometry) ring = e.geometry;
+    else if (e.type === 'relation' && e.members){ const o = e.members.find(m => m.geometry); if (o) ring = o.geometry; }
+    if (!ring || ring.length < 4) continue;
+    const pts = ring.map(p => new THREE.Vector2(px(p), pn(p)));
+    if (pts[0].distanceTo(pts[pts.length - 1]) < 0.01) pts.pop();
+    let cx = 0, cy = 0; for (const p of pts){ cx += p.x; cy += p.y; } cx /= pts.length; cy /= pts.length;
+    items.push({ e, pts, dist: Math.hypot(cx, cy) });
+  }
+  const chunks = [], center = [];
+  let cur = [];
+  const col = new THREE.Color();
+  for (let i = 0; i < items.length; i++){
+    const { e, pts, dist } = items[i];
+    const area = polyArea(pts);
+    if (area < 8) continue;
+    const cls = classify(e.tags);
+    const h = floorsFor(e.tags, area, e.id, cls) * FLOOR_H;
+    let g;
+    try{ g = new THREE.ExtrudeGeometry(new THREE.Shape(pts), { depth: h, bevelEnabled: false }); }catch(err){ continue; }
+    g.deleteAttribute('uv');
+    const pal = TYPE_COLOR[cls]; col.set(pal[e.id % pal.length]);
+    const pos = g.attributes.position, n = pos.count, ca = new Float32Array(n * 3);
+    for (let k = 0; k < n; k++){
+      const s = 0.72 + 0.28 * Math.min(1, pos.getZ(k) / h);
+      ca[k * 3] = col.r * s; ca[k * 3 + 1] = col.g * s; ca[k * 3 + 2] = col.b * s;
+    }
+    g.setAttribute('color', new THREE.BufferAttribute(ca, 3));
+    g.rotateX(-Math.PI / 2);
+    (dist < 35 ? center : cur).push(g);
+    if (cur.length >= 1500){ chunks.push(BGU.mergeGeometries(cur)); cur.forEach(x => x.dispose()); cur = []; }
+    if (i % 600 === 0){ pmsg(`建立房屋模型 ${i} / ${items.length}`, 55 + 25 * i / items.length); await sleep(0); }
+  }
+  if (cur.length) chunks.push(BGU.mergeGeometries(cur));
+  const mat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: .85, metalness: 0 });
+  for (const g of chunks){ const m = new THREE.Mesh(g, mat); m.castShadow = m.receiveShadow = true; world.add(m); }
+  if (center.length){ centerBldMesh = new THREE.Mesh(BGU.mergeGeometries(center), mat); centerBldMesh.castShadow = true; world.add(centerBldMesh); }
+  return items.length;
+}
+
+// 外圍房屋：用外框大小做成簡化方塊，一次畫完（開啟速度快）
+function buildOuter(list){
+  if (!list || !list.length) return 0;
+  const geo = new THREE.BoxGeometry(1, 1, 1); geo.translate(0, 0.5, 0);
+  const im = new THREE.InstancedMesh(geo, new THREE.MeshStandardMaterial({ roughness: .9 }), list.length);
+  const m = new THREE.Matrix4(), col = new THREE.Color(), far = new THREE.Color('#dfe3e6');
+  let k = 0;
+  list.forEach(([s, w, n, e, lv, ci], i) => {
+    const x0 = px({ lat: s, lon: w }), x1 = px({ lat: n, lon: e }), n0 = pn({ lat: s, lon: w }), n1 = pn({ lat: n, lon: e });
+    const W = Math.max(3, (x1 - x0) * 0.86), D = Math.max(3, (n1 - n0) * 0.86);
+    const cx = (x0 + x1) / 2, cz = -(n0 + n1) / 2, dist = Math.hypot(cx, cz);
+    if (dist > R_OUT || W * D > 60000) return;
+    const cls = CLS[ci] || 'res';
+    const fl = lv > 0 ? Math.min(MAX_FLOORS, lv) : floorsFor({}, W * D, i + 7, cls);
+    m.makeScale(W, fl * FLOOR_H, D); m.setPosition(cx, 0, cz); im.setMatrixAt(k, m);
+    const pal = TYPE_COLOR[cls]; col.set(pal[i % pal.length]);
+    col.lerp(far, Math.min(1, Math.max(0, (dist - FETCH_IN) / (R_OUT - FETCH_IN))) * 0.4);
+    im.setColorAt(k, col); k++;
+  });
+  im.count = k; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true;
+  im.receiveShadow = true; im.castShadow = true;
+  world.add(im);
+  return k;
+}
+
+/* ================== 平面：道路、人行道、標線、水域、綠地 ================== */
+class Flat {
+  constructor(){ this.p = []; }
+  tri(a, b, c){ this.p.push(...a, ...b, ...c); }
+  quad(ax, az, bx, bz, w, y){
+    const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz); if (L < 0.01) return;
+    const nx = -dz / L * w / 2, nz = dx / L * w / 2;
+    const p1 = [ax + nx, y, az + nz], p2 = [ax - nx, y, az - nz], p3 = [bx - nx, y, bz - nz], p4 = [bx + nx, y, bz + nz];
+    this.tri(p1, p2, p3); this.tri(p1, p3, p4);
+  }
+  disc(x, z, r, y, seg = 10){
+    for (let i = 0; i < seg; i++){
+      const a1 = i / seg * Math.PI * 2, a2 = (i + 1) / seg * Math.PI * 2;
+      this.tri([x, y, z], [x + Math.cos(a1) * r, y, z + Math.sin(a1) * r], [x + Math.cos(a2) * r, y, z + Math.sin(a2) * r]);
+    }
+  }
+  ribbon(line, w, y, joints = true){
+    for (let i = 0; i < line.length - 1; i++) this.quad(line[i][0], line[i][1], line[i + 1][0], line[i + 1][1], w, y);
+    if (joints) for (let i = 0; i < line.length; i++) this.disc(line[i][0], line[i][1], w / 2, y, 8);
+  }
+  stripe(line, off, w, y, dash){
+    let phase = 0; const D = 4, G = 6;
+    for (let i = 0; i < line.length - 1; i++){
+      const [ax, az] = line[i], [bx, bz] = line[i + 1];
+      const dx = bx - ax, dz = bz - az, L = Math.hypot(dx, dz); if (L < 0.01) continue;
+      const ux = dx / L, uz = dz / L, ox = -uz * off, oz = ux * off;
+      if (!dash){ this.quad(ax + ox, az + oz, bx + ox, bz + oz, w, y); continue; }
+      let t = -phase;
+      while (t < L){
+        const s = Math.max(0, t), e = Math.min(L, t + D);
+        if (e > s) this.quad(ax + ox + ux * s, az + oz + uz * s, ax + ox + ux * e, az + oz + uz * e, w, y);
+        t += D + G;
+      }
+      phase = (phase + L) % (D + G);
+    }
+  }
+  mesh(mat){
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(this.p, 3));
+    const n = new Float32Array(this.p.length); for (let i = 1; i < n.length; i += 3) n[i] = 1;
+    g.setAttribute('normal', new THREE.BufferAttribute(n, 3));
+    const m = new THREE.Mesh(g, mat); m.receiveShadow = true; return m;
+  }
+}
+const flatMat = (color, order, rough = .95) => new THREE.MeshStandardMaterial({ color, roughness: rough, side: THREE.DoubleSide,
+  polygonOffset: true, polygonOffsetFactor: -order, polygonOffsetUnits: -order * 4 });
+
+const ROAD = {
+  motorway:{w:24,r:9}, trunk:{w:22,r:8}, primary:{w:18,r:7}, secondary:{w:14,r:6}, tertiary:{w:11,r:5},
+  unclassified:{w:8,r:4}, residential:{w:7,r:3}, living_street:{w:6,r:3}, service:{w:4.5,r:2}, track:{w:3,r:1},
+  motorway_link:{w:8,r:8}, trunk_link:{w:8,r:7}, primary_link:{w:8,r:6}, secondary_link:{w:7,r:5}, tertiary_link:{w:7,r:4}
+};
+const PATH = /^(footway|path|pedestrian|cycleway|steps)$/;
+
+function clipLine(geom, R){
+  const out = []; let cur = [];
+  for (const p of geom){
+    const x = px(p), z = -pn(p);
+    if (Math.hypot(x, z) <= R){ cur.push([x, z]); }
+    else { if (cur.length > 1) out.push(cur); cur = []; }
+  }
+  if (cur.length > 1) out.push(cur);
+  return out;
+}
+
+const pillarPts = [];
+const nameInfo = new Map();
+function buildFlats(elements){
+  const asphalt = new Flat(), minor = new Flat(), side = new Flat(), path = new Flat(),
+        white = new Flat(), yellow = new Flat(), water = new Flat(), green = new Flat(), river = new Flat(),
+        deck = new Flat(), deckLine = new Flat();
+  for (const e of elements){
+    const t = e.tags || {};
+    if (e.type !== 'way' || !e.geometry) continue;
+    const isWater = t.natural === 'water' || t.landuse === 'reservoir' || t.waterway === 'riverbank';
+    const isGreen = /^(park|garden|pitch|playground)$/.test(t.leisure || '') || /^(grass|forest|recreation_ground|meadow|village_green)$/.test(t.landuse || '');
+    if ((isWater || isGreen) && e.geometry.length > 3){
+      const pts = e.geometry.map(p => new THREE.Vector2(px(p), pn(p)));
+      try{
+        const g = new THREE.ShapeGeometry(new THREE.Shape(pts));
+        const pa = g.attributes.position, idx = g.index, F = isWater ? water : green;
+        for (let i = 0; i < idx.count; i += 3){
+          const v = k => [pa.getX(idx.getX(i + k)), 0, -pa.getY(idx.getX(i + k))];
+          F.tri(v(0), v(1), v(2));
+        }
+        g.dispose();
+      }catch(err){}
+      continue;
+    }
+    if (/^(river|canal|stream|drain)$/.test(t.waterway || '')){
+      for (const L of clipLine(e.geometry, R_OUT)) river.ribbon(L, t.waterway === 'river' ? 22 : t.waterway === 'canal' ? 10 : 5, 0);
+      continue;
+    }
+    if (!t.highway || t.tunnel === 'yes' || t.area === 'yes') continue;
+    if (PATH.test(t.highway)){ for (const L of clipLine(e.geometry, RADIUS + 30)) path.ribbon(L, 2, 0.05); continue; }
+    const info = ROAD[t.highway]; if (!info) continue;
+    const lines = clipLine(e.geometry, R_OUT);
+    if (!lines.length) continue;
+    const inner = clipLine(e.geometry, RADIUS + 30);   // 只有細節範圍內畫人行道、標線
+    let w = info.w;
+    const wt = parseFloat(t.width); if (wt > 2) w = Math.min(40, Math.max(3, wt));
+    const lanes = parseInt(t.lanes);
+    if (lanes > 0) w = Math.max(w, lanes * 3.3 + 1);
+    const bridge = t.bridge && t.bridge !== 'no' && info.r >= 7;
+    const y = bridge ? Math.max(1, parseInt(t.layer) || 1) * 8 : 0.1 + info.r * 0.01;
+    const oneway = t.oneway === 'yes' || t.oneway === '1' || /link$/.test(t.highway);
+
+    if (t.name && info.r >= 5){
+      let len = 0; for (const L of lines) for (let i = 0; i < L.length - 1; i++) len += Math.hypot(L[i + 1][0] - L[i][0], L[i + 1][1] - L[i][1]);
+      const cur = nameInfo.get(t.name);
+      if (!cur || len > cur.len){ const L = lines[0]; const m = L[Math.floor(L.length / 2)]; nameInfo.set(t.name, { len, x: m[0], z: m[1], y, r: info.r }); }
+    }
+    for (const L of lines){
+      if (bridge){
+        deck.ribbon(L, w, y);
+        let acc = 0;
+        for (let i = 0; i < L.length - 1; i++){
+          const seg = Math.hypot(L[i + 1][0] - L[i][0], L[i + 1][1] - L[i][1]);
+          while (acc < seg){ const f = acc / seg; pillarPts.push([L[i][0] + (L[i + 1][0] - L[i][0]) * f, L[i][1] + (L[i + 1][1] - L[i][1]) * f, y]); acc += 35; }
+          acc -= seg;
+        }
+      } else (info.r >= 5 ? asphalt : minor).ribbon(L, w, y, info.r >= 4 || inner.length > 0);
+    }
+    for (const L of inner){
+      if (!bridge){
+        const hasSide = info.r >= 5 || (/^(both|left|right|yes)$/.test(t.sidewalk || '') && info.r >= 3);
+        if (hasSide) side.ribbon(L, w + 5, 0.06);
+      }
+      if (info.r >= 5){
+        const ly = y + 0.05, F = bridge ? deckLine : white, edge = w / 2 - 0.5;
+        F.stripe(L, edge, 0.15, ly, false); F.stripe(L, -edge, 0.15, ly, false);
+        if (oneway){
+          const n = lanes > 0 ? lanes : Math.max(1, Math.round((w - 1) / 3.5));
+          for (let k = 1; k < n; k++) F.stripe(L, -edge + k * (2 * edge / n), 0.15, ly, true);
+        } else {
+          if (info.r >= 6){ yellow.stripe(L, 0.2, 0.15, ly, false); yellow.stripe(L, -0.2, 0.15, ly, false); }
+          else F.stripe(L, 0, 0.15, ly, true);
+          const n = lanes > 0 ? Math.max(1, Math.floor(lanes / 2)) : Math.max(1, Math.round(edge / 3.5));
+          for (let k = 1; k < n; k++){ F.stripe(L, k * edge / n, 0.15, ly, true); F.stripe(L, -k * edge / n, 0.15, ly, true); }
+        }
+      }
+    }
+  }
+  const add = (F, mat, order) => { if (F.p.length){ const m = F.mesh(mat); m.renderOrder = order; world.add(m); } };
+  add(green, flatMat('#a8c98f', 1), 1);
+  add(water, flatMat('#8fb8d8', 1, .3), 1);
+  add(river, flatMat('#8fb8d8', 1, .3), 1);
+  add(side, flatMat('#c9c3b6', 2), 2);
+  add(path, flatMat('#d6cfbf', 3), 3);
+  add(minor, flatMat('#55595f', 4), 4);
+  add(asphalt, flatMat('#3b3f46', 5), 5);
+  add(white, flatMat('#f3f3ef', 7, .6), 7);
+  add(yellow, flatMat('#f0c23a', 7, .6), 7);
+  if (deck.p.length){ const m = deck.mesh(flatMat('#4a4e55', 5)); m.castShadow = true; world.add(m); }
+  add(deckLine, flatMat('#f3f3ef', 7, .6), 7);
+  if (pillarPts.length){
+    const im = new THREE.InstancedMesh(new THREE.BoxGeometry(2, 1, 2), new THREE.MeshStandardMaterial({ color: '#b7b4ad' }), pillarPts.length);
+    const mm = new THREE.Matrix4();
+    pillarPts.forEach(([x, z, y], i) => { mm.makeScale(1, y, 1); mm.setPosition(x, y / 2, z); im.setMatrixAt(i, mm); });
+    im.castShadow = true; world.add(im);
+  }
+}
+
+function buildNames(){
+  namesGroup.clear();
+  const list = [...nameInfo.entries()].sort((a, b) => b[1].r - a[1].r || b[1].len - a[1].len).slice(0, 40);
+  for (const [name, v] of list){
+    const far = Math.hypot(v.x, v.z) > RADIUS;
+    const s = textSprite(name, { size: 46, scale: far ? 1.0 : 0.55, bg: 'rgba(255,255,255,.9)', color: '#14284b' });
+    s.position.set(v.x, v.y + 14, v.z); namesGroup.add(s);
+  }
+  // 接待中心周邊（約 850 公尺內）的小路名：拉近時才顯示
+  nearNames.clear(); namesGroup.add(nearNames);
+  for (const n of NEAR_NAMES){
+    if (/巷|弄/.test(n.name)) continue;
+    const s = textSprite(n.name, { size: 44, fixed: 0.00042, bg: 'rgba(255,255,255,.92)', color: '#14284b', depthTest: false });
+    s.position.set(n.x, 4, -n.y); s.renderOrder = 18; nearNames.add(s);
+  }
+}
+const nearNames = new THREE.Group();
+let NEAR_NAMES = [];
+
+
+
+/* ================== 台74 快速道路：淡紅線＋台74 路牌 ================== */
+function hwyShield(){
+  const W = 168, H = 190, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d');
+  const shield = (inset) => {
+    const l = inset, r = W - inset, t = inset, b = H - inset, m = W / 2;
+    g.beginPath();
+    g.moveTo(l + 14, t); g.quadraticCurveTo(m, t + 16, r - 14, t);
+    g.lineTo(r, t + 18); g.lineTo(r, b - 70);
+    g.quadraticCurveTo(r, b - 18, m, b); g.quadraticCurveTo(l, b - 18, l, b - 70);
+    g.lineTo(l, t + 18); g.closePath();
+  };
+  g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 8; g.shadowOffsetY = 3;
+  shield(6); g.fillStyle = '#1d2a3a'; g.fill();
+  g.shadowColor = 'transparent';
+  shield(13); g.fillStyle = '#ffffff'; g.fill();
+  g.fillStyle = '#1d2a3a'; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.font = '700 40px "Noto Sans TC","Microsoft JhengHei",sans-serif'; g.fillText('台', W / 2, 58);
+  g.font = '800 70px "Arial Black","Noto Sans TC",sans-serif'; g.fillText('74', W / 2, 118);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  return { tex, W, H };
+}
+function buildHwy74(paths){
+  hwyGroup.clear();
+  const hw = paths.filter(p => p.c === 4);
+  if (!hw.length) return;
+  const mat = new THREE.MeshBasicMaterial({ color: '#e8473b', transparent: true, opacity: 0.42, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+  const HALF = 2.6;   // 紅線寬約 5 公尺
+  const marks = [];
+  // 離接待中心最近的那一段一定放一個路牌
+  { let best = null, bd = 1e12;
+    for (const p of hw){ if (p.L < 400) continue; p.p.forEach((q, i) => { const d = Math.hypot(q[0], q[1]); if (d < bd){ bd = d; const t = p.cum[i] / p.L; best = [q[0], p.y0 + (p.y1 - p.y0) * (t * t * (3 - 2 * t)), -q[1]]; } }); }
+    if (best) marks.push(best); }
+  for (const p of hw){
+    const pts = p.p, n = pts.length; if (n < 2) continue;
+    const pos = [], idx = [];
+    for (let i = 0; i < n; i++){
+      const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+      let tx = b[0] - a[0], ty = b[1] - a[1]; const L = Math.hypot(tx, ty) || 1; tx /= L; ty /= L;
+      const t = p.cum[i] / p.L, y = p.y0 + (p.y1 - p.y0) * (t * t * (3 - 2 * t)) + 0.35;
+      const nx = -ty, ny = tx;
+      pos.push(pts[i][0] + nx * HALF, y, -(pts[i][1] + ny * HALF), pts[i][0] - nx * HALF, y, -(pts[i][1] - ny * HALF));
+      if (i < n - 1){ const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx);
+    const m = new THREE.Mesh(geo, mat); m.renderOrder = 5; m.side = THREE.DoubleSide; mat.side = THREE.DoubleSide; hwyGroup.add(m);
+    // 路牌候選點：每 1.1 公里一個
+    if (p.L < 400) continue;
+    for (let s = 300; s < p.L - 150; s += 800){
+      let k = 0; while (k < p.cum.length - 2 && p.cum[k + 1] < s) k++;
+      const f = (s - p.cum[k]) / ((p.cum[k + 1] - p.cum[k]) || 1), A = pts[k], B = pts[k + 1];
+      const t = s / p.L, y = p.y0 + (p.y1 - p.y0) * (t * t * (3 - 2 * t));
+      marks.push([A[0] + (B[0] - A[0]) * f, y, -(A[1] + (B[1] - A[1]) * f)]);
+    }
+  }
+  // 雙向車道會重複，距離太近的路牌只留一個
+  const keep = [];
+  for (const m of marks) if (Math.hypot(m[0], m[2]) < R_OUT && !keep.some(k => Math.hypot(k[0] - m[0], k[2] - m[2]) < 650)) keep.push(m);
+  // 台74 標誌圖（map/hwy74.png），讀不到時改用畫的路牌
+  let tex, W, H;
+  const img = new Image();
+  const place = () => {
+    for (const [x, y, z] of keep){
+      const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+      sp.center.set(0.5, 0); sp.material.sizeAttenuation = false;
+      const f = 0.00026 * 190 / H; sp.scale.set(W * f, H * f, 1);
+      sp.position.set(x, y + 6, z); sp.renderOrder = 24; hwyGroup.add(sp);
+    }
+  };
+  img.onload = () => { tex = new THREE.Texture(img); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.needsUpdate = true; W = img.width; H = img.height; place(); };
+  img.onerror = () => { ({ tex, W, H } = hwyShield()); place(); };
+  img.src = 'hwy74.png?v=' + VER;
+}
+
+
+/* ================== 公車站牌圖層（拉近時顯示，點一下看路線）================== */
+const busGroup = new THREE.Group(); scene.add(busGroup);
+let BUS_ON = LS.get('bus', true);
+function busIcon(){
+  const S = 96, cv = document.createElement('canvas'); cv.width = S; cv.height = S + 18;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#1d7fd1'; g.beginPath(); g.roundRect(6, 6, S - 12, S - 12, 18); g.fill();
+  g.strokeStyle = '#fff'; g.lineWidth = 5; g.stroke();
+  g.beginPath(); g.moveTo(S / 2 - 9, S - 7); g.lineTo(S / 2, S + 12); g.lineTo(S / 2 + 9, S - 7); g.fillStyle = '#1d7fd1'; g.fill();
+  // 公車圖示
+  g.fillStyle = '#fff'; g.beginPath(); g.roundRect(26, 22, 44, 44, 8); g.fill();
+  g.fillStyle = '#1d7fd1'; g.fillRect(31, 28, 34, 16);
+  g.beginPath(); g.arc(35, 56, 4, 0, 7); g.arc(61, 56, 4, 0, 7); g.fill();
+  g.fillStyle = '#fff'; g.fillRect(30, 66, 8, 6); g.fillRect(58, 66, 8, 6);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  return { tex, W: cv.width, H: cv.height };
+}
+let BUS_LIST = [];
+function buildBus(){
+  busGroup.clear(); BUS_LIST = [];
+  const { tex, W, H } = busIcon();
+  for (const [cat, name, lat, lon, routes] of SHOPS.items){
+    if (cat !== 'bus') continue;
+    const x = px({ lat, lon }), z = -pn({ lat, lon }), d = Math.hypot(x, z);
+    if (d > 1600) continue;
+    const it = { cat, name, lat, lon, addr: routes, x, z, d, label: '公車站牌' };
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+    sp.center.set(0.5, 0); sp.material.sizeAttenuation = false;
+    const f = 0.00027; sp.scale.set(W * f, H * f, 1);
+    sp.position.set(x, 2, z); sp.renderOrder = 19; sp.userData.bus = BUS_LIST.length;
+    BUS_LIST.push(it); busGroup.add(sp);
+  }
+  busGroup.visible = BUS_ON;
+}
+function showBusStop(i){
+  const it = BUS_LIST[i]; if (!it) return;
+  openAgent(true); stopTour(); stopSpeak();
+  // 以這個站為第一筆，附近其他站排在後面
+  const rest = BUS_LIST.filter(b => b !== it).map(b => ({ ...b, dd: Math.hypot(b.x - it.x, b.z - it.z) })).sort((a, b) => a.dd - b.dd).slice(0, 5);
+  showShops({ cats: ['bus'], label: '公車站牌' }, [it, ...rest]);
+  $('scTitle').textContent = `公車站牌：${it.name}`;
+  focusShop(0, true);
+}
+
+/* ================== 周邊店家查詢（7-11、全家、五金行…，資料來自 OpenStreetMap，存在 shops.json）================== */
+let SHOPS = { items: [], updated: '' };
+const SHOP_R = 3200, BUS_R = 2000;
+function shopCat(t){
+  const nm = (t.brand || '') + ' ' + (t.name || '') + ' ' + (t['brand:zh'] || '') + ' ' + (t['name:en'] || '');
+  const sh = t.shop, am = t.amenity;
+  if (am === 'bicycle_rental') return 'youbike';
+  if (/夜市/.test(t.name || '') && !sh && !/restaurant|fast_food|cafe/.test(am || '')) return /停車場|通道/.test(t.name) ? 'parking' : 'nightmkt';
+  if (am === 'marketplace' || (/市場/.test(t.name || '') && !/超市|超級市場|超商/.test(nm))) return 'tradmkt';
+  if (am === 'parking') return 'parking';
+  if (am === 'hospital') return 'hospital';
+  if (sh === 'convenience' || /7-?eleven|統一超商|全家便利|familymart|萊爾富|hi-?life/i.test(nm)){
+    if (/7-?eleven|統一超商|7-11/i.test(nm)) return '711';
+    if (/全家|familymart/i.test(nm)) return 'family';
+    if (/萊爾富|hi-?life/i.test(nm)) return 'hilife';
+    if (/\bok\b|ok超商|ok mart/i.test(nm)) return 'ok';
+    if (/蝦皮/.test(nm)) return 'shopee';
+    return 'conv';
+  }
+  if (sh === 'supermarket'){ if (/全聯/.test(nm)) return 'pxmart'; if (/家樂福|carrefour/i.test(nm)) return 'carrefour'; return 'market'; }
+  if (sh === 'hardware' || sh === 'doityourself' || /五金|水電材料/.test(nm)) return 'hardware';
+  if (am === 'pharmacy' || sh === 'chemist' || /藥局|藥房/.test(nm)) return 'pharmacy';
+  if (am === 'cafe' || sh === 'coffee') return 'cafe';
+  if (sh === 'beverages' || sh === 'tea' || /50嵐|迷客夏|茶湯會|清心福全|可不可|麻古|得正|大苑子/.test(nm)) return 'drink';
+  if (am === 'fast_food') return 'fastfood';
+  if (am === 'restaurant') return 'food';
+  if (am === 'bank') return 'bank';
+  if (am === 'atm') return 'atm';
+  if (am === 'post_office') return 'post';
+  if (am === 'fuel') return 'fuel';
+  if (['hospital', 'clinic', 'doctors', 'dentist'].includes(am)) return 'clinic';
+  if (sh === 'bakery') return 'bakery';
+  if (sh === 'department_store' || sh === 'mall') return 'mall';
+  return null;
+}
+// 從 OpenStreetMap 下載最新店家與公車站牌（設定裡的「更新周邊店家」也用這個）
+async function overpassQ(q){
+  const servers = ['https://overpass-api.de/api/interpreter', 'https://overpass.private.coffee/api/interpreter', 'https://overpass.kumi.systems/api/interpreter', 'https://maps.mail.ru/osm/tools/overpass/api/interpreter'];
+  let last = '';
+  for (const sv of servers){
+    const ac = new AbortController(); const tm = setTimeout(() => ac.abort(), 100000);
+    try{
+      const r = await fetch(sv, { method: 'POST', body: 'data=' + encodeURIComponent(q), signal: ac.signal });
+      clearTimeout(tm);
+      if (!r.ok){ last = 'HTTP ' + r.status; continue; }
+      return await r.json();
+    }catch(e){ clearTimeout(tm); last = e.name === 'AbortError' ? '逾時' : '連線失敗'; }
+  }
+  throw new Error(last || '下載失敗');
+}
+function parseBus(j, items, seen){
+  const stops = new Map();
+  for (const e of j.elements || []) if (e.type === 'node' && (e.tags || {}).highway === 'bus_stop') stops.set(e.id, { e, refs: new Set() });
+  for (const e of j.elements || []){
+    if (e.type !== 'relation') continue;
+    const ref = ((e.tags || {}).ref || '').trim(); if (!ref) continue;
+    for (const m of e.members || []) if (m.type === 'node' && stops.has(m.ref)) stops.get(m.ref).refs.add(ref);
+  }
+  const natural = (a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999) || a.localeCompare(b);
+  for (const { e, refs } of stops.values()){
+    const name = ((e.tags || {}).name || '').trim(); if (!name) continue;
+    const k = 'bus' + name + e.lat.toFixed(4) + e.lon.toFixed(4); if (seen.has(k)) continue; seen.add(k);
+    items.push(['bus', name, Math.round(e.lat * 1e7) / 1e7, Math.round(e.lon * 1e7) / 1e7, [...refs].sort(natural).join('、'), '']);
+  }
+}
+async function fetchShopsOSM(){
+  const { lat, lon } = SALES_CENTER;
+  const A = `around:${SHOP_R},${lat},${lon}`;
+  const qs = `[out:json][timeout:90];nwr(${A})[shop];out center tags;`;
+  const qa = `[out:json][timeout:90];nwr(${A})[amenity~"^(pharmacy|cafe|fast_food|restaurant|bank|atm|post_office|fuel|clinic|doctors|dentist)$"];out center tags;`;
+  const qb = `[out:json][timeout:60];node(around:${BUS_R},${lat},${lon})[highway=bus_stop]->.s;.s out;rel(bn.s)[route=bus];out body;`;
+  const qf = `[out:json][timeout:90];(nwr(${A})[amenity~"^(bicycle_rental|marketplace|hospital)$"];nwr(${A})[amenity=parking][name];nwr(${A})[name~"夜市"];);out center tags;`;
+  const items = [], seen = new Set();
+  const FAC = ['youbike', 'nightmkt', 'tradmkt', 'parking', 'hospital'];
+  const els = [...(await overpassQ(qs)).elements, ...(await overpassQ(qa)).elements];
+  let facOK = true; try{ els.push(...(await overpassQ(qf)).elements); }catch(e){ facOK = false; }
+  for (const e of els){
+    const t = e.tags || {}, c = e.center || e; if (!c.lat) continue;
+    const cat = shopCat(t); if (!cat) continue;
+    const name = (t.name || t.brand || (cat === 'youbike' ? 'YouBike 站' : '')).trim(); if (!name && !['atm', 'conv'].includes(cat)) continue;
+    const k = cat + name + c.lat.toFixed(4) + c.lon.toFixed(4); if (seen.has(k)) continue; seen.add(k);
+    const addr = [t['addr:street'], t['addr:housenumber'] && t['addr:housenumber'] + '號'].filter(Boolean).join('');
+    items.push([cat, name, Math.round(c.lat * 1e7) / 1e7, Math.round(c.lon * 1e7) / 1e7, addr, t.branch || '']);
+  }
+  if (items.length < 20) throw new Error('店家資料太少');
+  if (!facOK) for (const it of SHOPS.items) if (FAC.includes(it[0])) items.push(it);   // 生活設施下載失敗時沿用舊的
+  try{ parseBus(await overpassQ(qb), items, seen); }
+  catch(e){ for (const it of SHOPS.items) if (it[0] === 'bus') items.push(it); }   // 公車資料下載失敗時沿用舊的
+  const d = new Date(); const updated = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  return { updated, src: 'OpenStreetMap', items };
+}
+async function loadShops(){
+  try{ const j = await fetch('shops.json?v=' + Date.now()).then(r => r.ok ? r.json() : null); if (j && j.items) SHOPS = j; }catch(e){}
+  if (C){ buildBus(); buildFac(); }
+}
+// 問句 → 店家類型
+const SHOP_Q = [
+  [/7-?11|7-?eleven|seven|小七|統一超商|711/i, ['711'], '7-11'],
+  [/全家|family/i, ['family'], '全家'],
+  [/萊爾富|hi-?life/i, ['hilife'], '萊爾富'],
+  [/\bok\b|ok超商|ok便利/i, ['ok'], 'OK超商'],
+  [/蝦皮/, ['shopee'], '蝦皮店到店'],
+  [/便利商店|超商|便利店|超商/, ['711', 'family', 'hilife', 'ok', 'conv'], '便利商店'],
+  [/全聯/, ['pxmart'], '全聯'],
+  [/超市|超級市場|美廉社|楓康/, ['pxmart', 'market', 'carrefour'], '超市'],
+  [/五金|水電行|水電材料|修繕|工具/, ['hardware'], '五金行', null, /五金|水電|材料|工具|建材/],
+  [/藥局|藥房|買藥|藥妝/, ['pharmacy'], '藥局'],
+  [/星巴克|starbucks/i, ['cafe'], '星巴克', /星巴克|starbucks/i],
+  [/85度/, ['cafe'], '85度C', /85度/],
+  [/路易莎/, ['cafe'], '路易莎', /路易莎/],
+  [/咖啡|cafe|coffee/i, ['cafe'], '咖啡店'],
+  [/飲料|手搖|珍奶|奶茶|50嵐|迷客夏|茶湯會/, ['drink'], '飲料店'],
+  [/麥當勞|mcdonald|麥當當/i, ['fastfood'], '麥當勞', /麥當勞|mcdonald/i],
+  [/肯德基|kfc/i, ['fastfood'], '肯德基', /肯德基|kfc/i],
+  [/摩斯|mos/i, ['fastfood'], '摩斯漢堡', /摩斯|mos/i],
+  [/早餐|漢堡|速食/, ['fastfood'], '早餐店／速食店'],
+  [/餐廳|吃飯|美食|小吃|吃的/, ['food', 'fastfood'], '餐廳'],
+  [/銀行|atm|提款|領錢/i, ['bank', 'atm'], '銀行／提款機'],
+  [/公車|巴士|站牌|客運|搭車/, ['bus'], '公車站牌'],
+  [/郵局|寄信|寄包裹/, ['post'], '郵局'],
+  [/加油站|加油/, ['fuel'], '加油站'],
+  [/youbike|ubike|微笑單車|公共自行車|腳踏車/i, ['youbike'], 'YouBike 站'],
+  [/夜市/, ['nightmkt'], '夜市'],
+  [/傳統市場|菜市場|黃昏市場|早市/, ['tradmkt'], '傳統市場'],
+  [/停車場|停車/, ['parking'], '停車場'],
+  [/醫院|急診|大醫院/, ['hospital', 'clinic'], '醫院', null, /醫院/],
+  [/診所|看病|牙醫|看醫生/, ['clinic'], '診所／醫院'],
+  [/麵包|烘焙|蛋糕/, ['bakery'], '麵包店'],
+];
+function shopQuery(q){
+  for (const [re, cats, label, nameRe, prefer] of SHOP_Q) if (re.test(q)) return { cats, label, nameRe, prefer };
+  // 直接說店名（例如「振宇五金」）
+  const s = q.replace(/\s/g, '');
+  const hit = SHOPS.items.find(it => it[1] && it[1].length >= 3 && s.includes(it[1].replace(/\s/g, '')));
+  if (hit) return { cats: [hit[0]], label: hit[1], nameRe: new RegExp(hit[1].replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) };
+  return null;
+}
+const walkMin = d => Math.max(1, Math.round(d * 1.3 / 75));
+const tripText = d => d > 1500 ? `開車大約${Math.max(3, Math.round(d * 1.4 / 450))}分鐘` : `走路大約${walkMin(d)}分鐘`;
+const distWord = d => d < 1000 ? `${Math.max(50, Math.round(d / 50) * 50)}公尺` : `${(d / 1000).toFixed(1)}公里`;
+const gmapDir = it => `https://www.google.com/maps/dir/?api=1&origin=${SALES_CENTER.lat},${SALES_CENTER.lon}&destination=${it.lat},${it.lon}&travelmode=${it.d > 1500 ? 'driving' : 'walking'}`;
+function shopLabel(it){ let n = it.name || it.label; n = n.replace(/便利商店/, ''); return n.length > 12 ? n.slice(0, 12) : n; }
+let SHOP_RES = [];
+function clearShops(){ shopGroup.clear(); SHOP_RES = []; $('shopCard').classList.remove('show'); }
+function findShops(sq){
+  const list = [];
+  for (const [cat, name, lat, lon, addr, branch] of SHOPS.items){
+    if (!sq.cats.includes(cat)) continue;
+    if (sq.nameRe && !sq.nameRe.test(name)) continue;
+    const x = px({ lat, lon }), z = -pn({ lat, lon }), d = Math.hypot(x, z);
+    if (d > SHOP_R) continue;
+    list.push({ cat, name: (name + (branch && !name.includes(branch) ? ' ' + branch : '')).replace(/^7-?eleven/i, '7-11').replace(/^統一超商/, '7-11').replace(/([\u4e00-\u9fff])\s+[A-Za-z][A-Za-z .]*$/, '$1'), lat, lon, addr, x, z, d, label: sq.label });
+  }
+  list.sort((a, b) => a.d - b.d);
+  // 公車站：同名的對向站牌合併成一筆（路線合在一起）
+  if (sq.cats.includes('bus')){
+    const out = [];
+    for (const it of list){
+      const o = out.find(k => k.name === it.name && Math.hypot(k.x - it.x, k.z - it.z) < 160);
+      if (o){ const rs = new Set([...(o.addr || '').split('、'), ...(it.addr || '').split('、')].filter(Boolean)); o.addr = [...rs].sort((a, b) => (parseInt(a) || 9999) - (parseInt(b) || 9999)).join('、'); }
+      else out.push({ ...it });
+    }
+    return out;
+  }
+  if (sq.prefer){ const good = list.filter(it => sq.prefer.test(it.name)); if (good.length) return good; }
+  return list;
+}
+function showShops(sq, list){
+  shopGroup.clear(); hidePhoto(); routeGroup.clear();
+  SHOP_RES = list.slice(0, 8);
+  SHOP_RES.forEach((it, i) => {
+    const g = new THREE.Group(); g.position.set(it.x, 0, it.z); g.userData.shop = i;
+    const pin = new THREE.Mesh(new THREE.CylinderGeometry(1.6, 1.6, 44, 10, 1, true), new THREE.MeshBasicMaterial({ color: '#d64541', transparent: true, opacity: .7, depthWrite: false }));
+    pin.position.y = 22; pin.userData.shop = i; g.add(pin);
+    const dot = new THREE.Mesh(new THREE.CircleGeometry(6, 28), new THREE.MeshBasicMaterial({ color: '#d64541', transparent: true, opacity: .85, depthWrite: false }));
+    dot.rotation.x = -Math.PI / 2; dot.position.y = 1.0; g.add(dot);
+    const lab = vTextSprite((i + 1) + ' ' + shopLabel(it), { size: 46, fixed: 0.00036, bg: 'rgba(214,69,65,.93)' });
+    lab.position.y = 50; lab.userData.shop = i; lab.renderOrder = 25; g.add(lab);
+    shopGroup.add(g);
+  });
+  const n1 = list.filter(it => it.d <= 1000).length;
+  const isBus = sq.cats.includes('bus') || sq.cats.includes('youbike'), u = isBus ? '站' : (sq.cats.includes('parking') ? '處' : '家');
+  $('scTitle').textContent = `附近的${sq.label}（1 公里內 ${n1} ${u}・${isBus ? 2 : 3} 公里內 ${list.length} ${u}）`;
+  $('scUpd').textContent = SHOPS.updated ? SHOPS.updated + ' 更新' : '';
+  $('scList').innerHTML = '';
+  SHOP_RES.slice(0, 6).forEach((it, i) => {
+    const row = document.createElement('div'); row.className = 'it';
+    row.innerHTML = `<span class="no">${i + 1}</span><span class="tx"><div class="nm"></div><div class="ds"></div></span><a target="_blank" rel="noopener">導航</a>`;
+    row.querySelector('.nm').textContent = it.name || sq.label;
+    row.querySelector('.ds').textContent = `直線約 ${distWord(it.d)}・${tripText(it.d).replace('大約', '約 ').replace('分鐘', ' 分鐘')}${it.addr ? (it.cat === 'bus' ? '・路線 ' : '・') + it.addr : ''}`;
+    const a = row.querySelector('a'); a.href = gmapDir(it); a.onclick = e => e.stopPropagation();
+    row.onclick = () => focusShop(i, true);
+    $('scList').appendChild(row);
+  });
+  $('shopCard').classList.add('show');
+}
+function focusShop(i, talk){
+  const it = SHOP_RES[i]; if (!it) return;
+  flyToPoi(it);
+  if (talk) say(it.cat === 'bus' ? `「${it.name}」公車站，離接待中心直線大約${distWord(it.d)}，${tripText(it.d)}${it.addr ? '，經過的路線有' + it.addr.split('、').slice(0, 8).join('、') : ''}。` : `${it.name || it.label}，離接待中心直線大約${distWord(it.d)}，${tripText(it.d)}。按旁邊的導航，可以用Google地圖帶您過去。`, 'point');
+}
+async function answerShop(sq){
+  if (!SHOPS.items.length){ await say('周邊店家資料還沒有下載，請到設定裡按「更新周邊店家」，我就能幫您找了。', 'think', defaultChips()); return; }
+  const list = findShops(sq);
+  if (!list.length){ clearShops(); await say(`目前地圖資料裡，接待中心三公里內沒有找到${sq.label}，這部分我請專人幫您確認喔。`, 'think', defaultChips()); return; }
+  showShops(sq, list);
+  const near = list[0], n1 = list.filter(it => it.d <= 1000).length;
+  $('agWhere').textContent = '小昕 · 正在找 ' + sq.label;
+  const fly = flyToPoi(near);
+  const U = sq.cats.includes('youbike') ? '站' : (sq.cats.includes('parking') ? '處' : '家');
+  const more = list.length > 1 ? (n1 > 1 ? `方圓一公里內有${n1}${U}，` : `三公里內共有${list.length}${U}，`) + '我把最近的幾家都標在地圖上了。' : '我把位置標在地圖上了。';
+  if (sq.cats.includes('bus')){
+    const n2 = list.filter(it => it.d <= 500).length, routes = new Set(); list.filter(it => it.d <= 500).forEach(it => (it.addr || '').split('、').filter(Boolean).forEach(r => routes.add(r)));
+    const rs = [...routes].slice(0, 8).join('、');
+    await say(`離接待中心最近的公車站是「${near.name}」，直線大約${distWord(near.d)}，${tripText(near.d)}${near.addr ? '，有' + near.addr.split('、').slice(0, 6).join('、') + '號公車經過' : ''}。走路五百公尺內有${n2}個站牌${rs ? '，可以搭' + rs + '等路線' : ''}，我把最近的站牌標在地圖上了。`, 'point', ['7-11在哪裡', '交通方便嗎', '附近有哪些景點']);
+    await fly; return;
+  }
+  await say(`離接待中心最近的${sq.label}是${near.name || sq.label}，直線大約${distWord(near.d)}，${tripText(near.d)}。${more}`, 'point',
+    [sq.label === '7-11' ? '全家在哪裡' : '7-11在哪裡', '附近有五金行嗎', '附近有哪些景點']);
+  await fly;
+}
+
+/* ================== 景點 ================== */
+let FOUND = [];   // 地圖上找得到的景點
+const distText = m => m < 400 ? `距離只有大約${Math.max(50, Math.round(m / 50) * 50)}公尺` : `直線距離大約${(m / 1000).toFixed(1)}公里`;
+function resolvePois(cands){
+  FOUND = [];
+  for (const p of POIS){
+    let lat = p.lat, lon = p.lon, label = p.name;
+    if (!(lat && lon) && p.osm){
+      let re; try{ re = new RegExp(p.osm); }catch(e){ continue; }
+      let best = null, bd = 1e12;
+      for (const c of cands || []){
+        if (!re.test(c.name)) continue;
+        const d = Math.hypot(px(c), pn(c));
+        if (d < bd){ bd = d; best = c; }
+      }
+      if (!best) continue;
+      lat = best.lat; lon = best.lon;
+    }
+    if (!(lat && lon)) continue;
+    const x = px({ lat, lon }), z = -pn({ lat, lon }), d = Math.hypot(x, z);
+    if (d > R_OUT + 200) continue;
+    FOUND.push({ ...p, label, x, z, d, intro: (p.intro || p.name).replaceAll('{d}', distText(d)) });
+  }
+  FOUND.sort((a, b) => a.d - b.d);
+}
+function buildPois(){
+  poiGroup.clear();
+  for (const p of FOUND){
+    const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.userData.poi = p.id;
+    const pin = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 2.2, 70, 12, 1, true),
+      new THREE.MeshBasicMaterial({ color: '#2f6fb3', transparent: true, opacity: .6, depthWrite: false }));
+    pin.position.y = 35; pin.userData.poi = p.id; g.add(pin);
+    const dot = new THREE.Mesh(new THREE.CircleGeometry(9, 32), new THREE.MeshBasicMaterial({ color: '#2f6fb3', transparent: true, opacity: .8, depthWrite: false }));
+    dot.rotation.x = -Math.PI / 2; dot.position.y = 0.9; g.add(dot);
+    const lab = vTextSprite('★' + p.name.replace(/\s+/g, ''), { size: 50, fixed: 0.00042, bg: 'rgba(47,111,179,.92)' });
+    lab.position.y = 80; lab.userData.poi = p.id; g.add(lab);
+    poiGroup.add(g);
+  }
+}
+// 接待中心 → 景點的弧線與距離
+function drawRoute(p){
+  routeGroup.clear();
+  if (!p || p.d < 120) return;
+  const h = Math.min(500, p.d * 0.18);
+  const curve = new THREE.QuadraticBezierCurve3(new THREE.Vector3(0, 6, 0), new THREE.Vector3(p.x / 2, h, p.z / 2), new THREE.Vector3(p.x, 6, p.z));
+  const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(80)),
+    new THREE.LineDashedMaterial({ color: '#c9a45c', dashSize: 18, gapSize: 10, depthTest: false, transparent: true }));
+  line.computeLineDistances(); line.renderOrder = 20; routeGroup.add(line);
+  const mid = curve.getPoint(0.5);
+  const lab = textSprite(`直線 ${(p.d / 1000).toFixed(1)} 公里`, { size: 44, fixed: 0.0004, bg: 'rgba(201,164,92,.95)', color: '#1d2533', depthTest: false });
+  lab.position.copy(mid).add(new THREE.Vector3(0, 20, 0)); lab.renderOrder = 21; routeGroup.add(lab);
+}
+function poiById(id){ return FOUND.find(p => p.id === id); }
+function flyToPoi(p){
+  if (!p) return;
+  drawRoute(p);
+  const dist = p.d < 400 ? 360 : 520;
+  // 從接待中心方向看過去：鏡頭位在景點和接待中心之間的後方
+  const az = Math.atan2(-p.x, -p.z);
+  flyTo(new THREE.Vector3(p.x, 0, p.z), dist, 0.95, 2400, p.d > 120 ? az : undefined);
+}
+
+/* ================== 資料下載與快取 ================== */
+const KEEP = ['building','building:levels','height','amenity','shop','highway','name','lanes','width','oneway',
+  'bridge','layer','tunnel','sidewalk','area','natural','landuse','leisure','waterway'];
+function compact(raw){
+  const r7 = v => Math.round(v * 1e7) / 1e7, r6 = v => Math.round(v * 1e6) / 1e6;
+  const g = a => a.map(p => ({ lat: r7(p.lat), lon: r7(p.lon) }));
+  const inner = [], outer = [], poi = [], seen = new Set();
+  for (const e of raw.elements){
+    const t = e.tags || {};
+    if (t.name && (e.center || (e.type === 'node' && e.lat)) && !e.geometry){
+      const c = e.center || e, pk = 'p' + e.type + e.id; if (seen.has(pk)) continue; seen.add(pk);
+      poi.push({ name: t.name, lat: r7(c.lat), lon: r7(c.lon) }); continue;
+    }
+    if (e.bounds && !e.geometry && !e.members){
+      const bk = 'b' + e.type + e.id; if (seen.has(bk)) continue; seen.add(bk);
+      if (!t.building) continue;
+      let lv = parseFloat(t['building:levels']); if (!(lv > 0)){ const h = parseFloat(t.height); lv = h > 0 ? Math.round(h / FLOOR_H) : -1; }
+      const b = e.bounds;
+      outer.push([r6(b.minlat), r6(b.minlon), r6(b.maxlat), r6(b.maxlon), lv, CLS.indexOf(classify(t))]);
+      continue;
+    }
+    const key = e.type + e.id; if (seen.has(key)) continue; seen.add(key);
+    const tt = {}; for (const k of KEEP) if (t[k] != null) tt[k] = t[k];
+    if (e.type === 'way' && e.geometry) inner.push({ type:'way', id:e.id, tags:tt, geometry:g(e.geometry) });
+    else if (e.type === 'relation' && e.members){
+      const m = e.members.filter(x => x.role === 'outer' && x.geometry).map(x => ({ role:'outer', geometry:g(x.geometry) }));
+      if (m.length) inner.push({ type:'relation', id:e.id, tags:tt, members:m });
+    }
+  }
+  return { elements: inner, outer, poi };
+}
+const nearC = (o, c) => o && o.v === DATA_VER && Math.hypot((o.lat - c.lat) * KY, (o.lon - c.lon) * KX) < 250;
+
+async function loadData(center, force){
+  if (!force && served){
+    try{
+      pmsg('讀取離線地圖檔', 25);
+      const r = await fetch('map-data.json', { cache: 'no-cache' });
+      if (r.ok){ const j = await r.json(); if (nearC(j, center)) return j.data; }
+    }catch(e){}
+  }
+  const cache = force ? null : await idb.get('osm-v3');
+  if (nearC(cache, center)){ pmsg('讀取本機快取地圖', 40); return cache.data; }
+  const a = (r) => `(around:${r},${center.lat},${center.lon})`;
+  const box = (r, qx, qy) => {   // 四個象限的範圍框
+    const dLat = r / KY, dLon = r / KX;
+    const s0 = qy ? center.lat : center.lat - dLat, n0 = qy ? center.lat + dLat : center.lat;
+    const w0 = qx ? center.lon : center.lon - dLon, e0 = qx ? center.lon + dLon : center.lon;
+    return `(${s0.toFixed(6)},${w0.toFixed(6)},${n0.toFixed(6)},${e0.toFixed(6)})`;
+  };
+  const H = '[out:json][timeout:90];';
+  const Q = [];
+  for (const [qx, qy] of [[0, 0], [1, 0], [0, 1], [1, 1]]){
+    const bi = box(FETCH_IN, qx, qy), bo = box(FETCH_OUT, qx, qy);
+    Q.push(`${H}(way["building"]${a(FETCH_IN)}${bi};relation["building"]${a(FETCH_IN)}${bi};);out geom;`);
+    Q.push(`${H}(way["building"]${a(FETCH_OUT)}${bo}; - way["building"]${a(FETCH_IN)};)->.o;.o out tags bb;`);
+  }
+  Q.push(`${H}way["highway"]${a(FETCH_IN)};out geom;`);
+  Q.push(`${H}(
+    way["highway"~"^(motorway|trunk|primary|secondary|tertiary|unclassified|residential)(_link)?$"]${a(FETCH_OUT)};
+    way["natural"="water"]${a(FETCH_OUT)};
+    way["waterway"~"^(river|canal|stream|riverbank)$"]${a(FETCH_OUT)};
+    way["leisure"~"^(park|garden|pitch|playground)$"]${a(FETCH_OUT)};
+    way["landuse"~"^(grass|forest|recreation_ground|meadow|village_green|reservoir)$"]${a(FETCH_OUT)};
+  );out geom;`);
+  const poiRe = POIS.filter(p => p.osm).map(p => p.osm).join('|');
+  if (poiRe) Q.push(`${H}nwr["name"~"${poiRe}"](around:4500,${center.lat},${center.lon});out center tags;`);
+  const label = '分段下載周邊 3.5 公里道路與房屋資料';
+  pmsg(label, 20);
+  const data = compact(await overpassChunks(Q, label));
+  await idb.set('osm-v3', { v: DATA_VER, lat: center.lat, lon: center.lon, data });
+  if (served){
+    try{
+      pmsg('儲存離線地圖檔', 44);
+      await fetch(API + 'save-map', { method:'POST', headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ v: DATA_VER, lat: center.lat, lon: center.lon, data }) });
+    }catch(e){}
+  }
+  return data;
+}
+
+async function loadPoiConfig(){
+  if (!served) return;
+  try{
+    const r = await fetch('pois.json', { cache: 'no-cache' });
+    if (r.ok){ const j = await r.json(); if (Array.isArray(j) && j.length) POIS = j; }
+  }catch(e){}
+}
+
+/* ================== Blender 製作的地圖（精緻區先載、外圍後補）================== */
+const BL = 'blender/';
+const GROUND_NAMES = /^(道路_柏油|人行道|街廓地面|空地草地|公園綠地|分隔島|精緻區_底面|標線_)/;
+/* 河面：反射天空＋流動波紋 */
+function makeWaterNormal(){
+  const n = 256, cv = document.createElement('canvas'); cv.width = cv.height = n;
+  const g = cv.getContext('2d'), img = g.createImageData(n, n);
+  const H = (x, y) => { let h = 0; for (const [a, b, f, p] of [[1, 0.3, 3, 0], [0.4, 1, 5, 1.3], [-0.7, 0.6, 7, 2.1], [0.2, -0.9, 11, 0.7]]) h += Math.sin((x * a + y * b) / n * Math.PI * 2 * f + p) / f; return h; };
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++){
+    const dx = (H(x + 1, y) - H(x - 1, y)) * 6, dy = (H(x, y + 1) - H(x, y - 1)) * 6, l = Math.hypot(dx, dy, 1), i = (y * n + x) * 4;
+    img.data[i] = (-dx / l * 0.5 + 0.5) * 255; img.data[i + 1] = (-dy / l * 0.5 + 0.5) * 255; img.data[i + 2] = (1 / l * 0.5 + 0.5) * 255; img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(1 / 18, 1 / 18); return t;
+}
+const WATER_N = makeWaterNormal();
+const WATER_MAT = new THREE.MeshStandardMaterial({ color: '#2f5d6a', roughness: 0.08, metalness: 0.0, envMapIntensity: 0.55,
+  normalMap: WATER_N, normalScale: new THREE.Vector2(0.35, 0.35), side: THREE.DoubleSide });
+function setupWater(root){
+  root.traverse(o => {
+    if (!o.isMesh || !/河川|水面/.test(o.name)) return;
+    // 平面座標當貼圖座標（公尺）
+    const pos = o.geometry.attributes.position, uv = new Float32Array(pos.count * 2), v = new THREE.Vector3();
+    o.updateMatrixWorld();
+    for (let i = 0; i < pos.count; i++){ v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld); uv[i * 2] = v.x; uv[i * 2 + 1] = v.z; }
+    o.geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    o.material = WATER_MAT; o.receiveShadow = true;
+  });
+}
+let LM = null;
+function applyLightmap(root){
+  if (!LM) return;
+  const S = LM.size, v = new THREE.Vector3();
+  root.traverse(o => {
+    if (!o.isMesh || !GROUND_NAMES.test(o.name)) return;
+    o.updateMatrixWorld();
+    const g = o.geometry, pos = g.attributes.position, n = pos.count, uv = new Float32Array(n * 2);
+    for (let i = 0; i < n; i++){
+      v.fromBufferAttribute(pos, i).applyMatrix4(o.matrixWorld);
+      uv[i * 2] = (v.x + S) / (2 * S); uv[i * 2 + 1] = (-v.z + S) / (2 * S);
+    }
+    g.setAttribute('uv1', new THREE.BufferAttribute(uv, 2));
+    const old = o.material;
+    const mats = (Array.isArray(old) ? old : [old]).map(m => {
+      const b = new THREE.MeshBasicMaterial({ map: m.map, color: m.color, lightMap: LM.tex, lightMapIntensity: Math.PI * 1.05, side: THREE.DoubleSide,
+        polygonOffset: true, polygonOffsetFactor: /^標線_/.test(o.name) ? -4 : 0, polygonOffsetUnits: /^標線_/.test(o.name) ? -4 : 0 });
+      if (b.map) b.map.anisotropy = 8;
+      if (/^(街廓地面|精緻區_底面)/.test(o.name)) b.color.multiplyScalar(0.84);
+      return b;
+    });
+    o.material = Array.isArray(old) ? mats : mats[0];
+  });
+}
+// 白色房屋模式（網址加 ?white=1）：牆面與屋頂改成白色，保留窗格與牆腳陰影
+// 預設：全白模型（窗戶也白）；?white=1：白色房屋保留窗格；?color=1 或 ?white=0：彩色
+const QS = new URLSearchParams(location.search);
+const WHITE = !QS.has('color') && QS.get('white') !== '0';
+const WHITE_ALL = WHITE && QS.get('white') !== '1';
+function whiten(o){
+  const c = o.geometry.attributes.color; if (!c) return;
+  for (let i = 0; i < c.count; i++){
+    const l = (c.getX(i) + c.getY(i) + c.getZ(i)) / 3;
+    const g = Math.min(1.0, l * 1.1 + 0.32);
+    c.setXYZ(i, g, g, g * 0.985);
+  }
+  c.needsUpdate = true;
+}
+function tuneMaterials(root, far){
+  root.traverse(o => {
+    if (!o.isMesh) return;
+    if (!far && /^(建築_|高架|台鐵高架)/.test(o.name)) { o.castShadow = true; o.receiveShadow = true; }
+    if (WHITE && /^(建築_|外圍_(大樓|透天|廠房|宮廟))/.test(o.name)) whiten(o);
+    if (far || !/^(建築_|高架|台鐵高架)/.test(o.name)) o.castShadow = o.receiveShadow = false;
+    const ms = Array.isArray(o.material) ? o.material : [o.material];
+    for (const m of ms){
+      if (m.map){ m.map.anisotropy = far ? 4 : 8; }
+      if (/外牆|屋頂|女兒牆/.test(m.name)){ m.roughness = 0.85; m.metalness = 0; m.envMapIntensity = 0; if (WHITE) m.color.setScalar(/屋頂|女兒牆/.test(m.name) ? 1.35 : 1.22); if (WHITE_ALL){ m.map = null; m.color.setScalar(/屋頂|女兒牆/.test(m.name) ? 1.0 : 0.98); m.needsUpdate = true; } }
+      if (/水/.test(m.name)){ m.roughness = 0.25; m.metalness = 0.1; }
+      if (!/外牆|屋頂|女兒牆/.test(m.name) && m.envMapIntensity !== undefined) m.envMapIntensity = 0.18;   // 天空環境光只淡淡補光
+      if (!/外牆|屋頂|樹/.test(m.name)) m.side = THREE.DoubleSide;
+      if (/女兒牆/.test(m.name)) m.shadowSide = THREE.FrontSide;   // 平面類（地面、水面、道路）雙面顯示
+    }
+    if (o.name === '秉和昕心_預留量體') o.visible = false;   // 網頁另有可點選的預留量體
+  });
+}
+async function loadTrees(shadow){
+  const g = await loadGLB(BL + 'trees.glb'); const list = await fetchJSON(BL + 'trees.json');
+  const proto = {};
+  g.scene.traverse(o => { if (o.isMesh) proto[o.name] = o; });
+  const kinds = [['行道樹', '行道樹_幹'], ['公園樹', '公園樹_幹']];
+  const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), sc = new THREE.Vector3(), p = new THREE.Vector3(), up = new THREE.Vector3(0, 1, 0), col = new THREE.Color();
+  for (let k = 0; k < 2; k++){
+    const items = list.filter(t => t[3] === k);
+    for (const nm of kinds[k]){
+      const src = proto[nm]; if (!src) continue;
+      const mat = src.material.clone(); mat.roughness = 0.95; mat.envMapIntensity = 0.12;
+      if (!/幹/.test(nm)) mat.color.set('#ffffff');   // 樹葉顏色由每棵樹的顏色決定
+      const im = new THREE.InstancedMesh(src.geometry, mat, items.length);
+      items.forEach((t, i) => {
+        q.setFromAxisAngle(up, (i * 2.399) % 6.283);
+        const s = t[2] * 1.2; sc.set(s, s * (0.9 + (i % 7) * 0.03), s); p.set(t[0], 0.15, -t[1]);
+        m4.compose(p, q, sc); im.setMatrixAt(i, m4);
+        if (!/幹/.test(nm)){ col.setHSL(0.27 + (i % 5) * 0.012, 0.50 + (i % 3) * 0.06, 0.13 + (i % 9) * 0.012); im.setColorAt(i, col); }
+      });
+      im.frustumCulled = false; im.castShadow = !!shadow && !/幹/.test(nm);
+      world.add(im);
+    }
+  }
+  return list.length;
+}
+const gltfLoader = new GLTFLoader(); gltfLoader.setMeshoptDecoder(MeshoptDecoder);
+/* ================== 車流（依真實道路、分車道、照單行道方向）================== */
+const CARS = { list: [], paths: [], body: null, glass: null, on: LS.get('cars', true) };
+const CAR_COLORS = [['#f1f1ee', 30], ['#b7babe', 18], ['#1f2124', 15], ['#6a6e74', 10], ['#a32a2a', 8], ['#2d4f8e', 7], ['#1f2c45', 4], ['#c9b797', 4], ['#e5b521', 4]];
+function pickColor(r){ let t = r * 100; for (const [c, w] of CAR_COLORS){ if ((t -= w) <= 0) return c; } return '#f1f1ee'; }
+async function loadCars(){
+  const paths = await fetchJSON(BL + 'cars.json');
+  // 每條路的累積長度
+  for (const p of paths){
+    const cum = [0];
+    for (let i = 1; i < p.p.length; i++) cum.push(cum[i - 1] + Math.hypot(p.p[i][0] - p.p[i - 1][0], p.p[i][1] - p.p[i - 1][1]));
+    p.cum = cum; p.L = cum[cum.length - 1];
+    p.d0 = Math.min(...p.p.map(q => Math.hypot(q[0], q[1])));
+  }
+  CARS.paths = paths;
+  try{ buildHwy74(paths); }catch(e){ console.warn('台74標示失敗', e); }
+  const N = MOBILE ? 260 : (HQ ? 1100 : 650);
+  const wts = paths.map(p => p.L * [0.35, 1.2, 2.2, 3.2, 4.5][p.c] * Math.max(1, p.l / 2) * (p.d0 < 1500 ? 1 : Math.exp(-(p.d0 - 1500) / 400)));
+  const tot = wts.reduce((a, b) => a + b, 0);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const SPEED = [[7, 10], [9, 12], [10, 14], [12, 16], [19, 25]];
+  for (let k = 0; k < N; k++){
+    let r = rnd() * tot, i = 0; while (i < wts.length - 1 && (r -= wts[i]) > 0) i++;
+    const p = paths[i];
+    const dir = p.ow ? 1 : (rnd() < 0.5 ? 1 : -1);
+    const nl = p.ow ? Math.max(1, p.l) : Math.max(1, Math.floor(p.l / 2));
+    const lane = Math.floor(rnd() * nl);
+    const off = p.ow ? (lane - (nl - 1) / 2) * 3.3 : (lane + 0.5) * 3.3 + 0.3;
+    const [a, b] = SPEED[p.c];
+    const big = p.c >= 2 && rnd() < 0.06;   // 公車、貨車
+    CARS.list.push({ p, dir, off, s: rnd() * p.L, v: a + rnd() * (b - a) - (big ? 2 : 0), seg: 0, big,
+      len: big ? 10 + rnd() * 2 : 4.1 + rnd() * 0.8, hgt: big ? 2.4 : 0.9 + rnd() * 0.35, col: big ? (rnd() < 0.5 ? '#e9e6dc' : '#3b7a57') : pickColor(rnd()) });
+  }
+  // 車身（有顏色）＋車窗（深色）
+  const bodyG = new THREE.BoxGeometry(1, 1, 1); bodyG.translate(0, 0.5, 0);
+  const glassG = new THREE.BoxGeometry(1, 1, 1); glassG.translate(0, 0.5, 0);
+  const bodyM = new THREE.MeshStandardMaterial({ roughness: 0.4, metalness: 0.25, envMapIntensity: 0.3 });
+  const glassM = new THREE.MeshStandardMaterial({ color: '#1b2530', roughness: 0.15, metalness: 0.4, envMapIntensity: 0.45 });
+  CARS.body = new THREE.InstancedMesh(bodyG, bodyM, N); CARS.glass = new THREE.InstancedMesh(glassG, glassM, N);
+  const col = new THREE.Color();
+  CARS.list.forEach((c, i) => CARS.body.setColorAt(i, col.set(c.col)));
+  for (const m of [CARS.body, CARS.glass]){ m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); m.frustumCulled = false; m.castShadow = HQ; world.add(m); }
+  CARS.body.visible = CARS.glass.visible = CARS.on;
+}
+const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vector3(), _sc = new THREE.Vector3(), _up = new THREE.Vector3(0, 1, 0);
+function updateCars(dt){
+  if (!CARS.body || !CARS.on) return;
+  const far = camera.position.distanceTo(controls.target) > 4200;
+  CARS.body.visible = CARS.glass.visible = !far;
+  if (far) return;
+  CARS.list.forEach((c, i) => {
+    const p = c.p;
+    c.s += c.v * dt; if (c.s > p.L){ c.s -= p.L; c.seg = 0; }
+    const d = c.dir > 0 ? c.s : p.L - c.s;
+    if (c.dir > 0){ while (c.seg < p.cum.length - 2 && p.cum[c.seg + 1] < d) c.seg++; if (p.cum[c.seg] > d) c.seg = 0; }
+    else { c.seg = 0; let lo = 0, hi = p.cum.length - 2; while (lo < hi){ const mid = (lo + hi + 1) >> 1; if (p.cum[mid] <= d) lo = mid; else hi = mid - 1; } c.seg = lo; }
+    const k = c.seg, A = p.p[k], B = p.p[k + 1], sl = (p.cum[k + 1] - p.cum[k]) || 1, f = (d - p.cum[k]) / sl;
+    let ux = (B[0] - A[0]) / sl, uy = (B[1] - A[1]) / sl;
+    if (c.dir < 0){ ux = -ux; uy = -uy; }
+    const x = A[0] + (B[0] - A[0]) * f + uy * c.off, yN = A[1] + (B[1] - A[1]) * f - ux * c.off;
+    const t = d / p.L, y = p.y0 + (p.y1 - p.y0) * (t * t * (3 - 2 * t));
+    _q.setFromAxisAngle(_up, Math.atan2(uy, ux));
+    _p.set(x, y + 0.12, -yN); _sc.set(c.len, c.hgt * 0.62 + 0.3, c.big ? 2.5 : 1.8); _m.compose(_p, _q, _sc); CARS.body.setMatrixAt(i, _m);
+    const back = c.big ? 0 : -0.08 * c.len;
+    _p.set(x + ux * back, y + 0.12 + c.hgt * 0.62 + 0.3, -(yN + uy * back)); _sc.set(c.big ? c.len * 0.96 : c.len * 0.52, c.big ? 0.75 : c.hgt * 0.42, c.big ? 2.4 : 1.62);
+    _m.compose(_p, _q, _sc); CARS.glass.setMatrixAt(i, _m);
+  });
+  CARS.body.instanceMatrix.needsUpdate = CARS.glass.instanceMatrix.needsUpdate = true;
+}
+const VER = '20261026o';
+// 下載失敗會自動重試（本機伺服器偶爾會中斷連線）
+async function fetchBuf(url, onProg, tries = 8){
+  let lastErr;
+  for (let i = 0; i < tries; i++){
+    // 卡住 3 秒沒有進度就中斷重下（本機防護軟體偶爾會讓傳輸停住）
+    const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    let last = performance.now(), dog = null;
+    if (ctl) dog = setInterval(() => { if (performance.now() - last > 3000) ctl.abort(); }, 500);
+    try{
+      const r = await fetch(url + (url.includes('?') ? '&' : '?') + 'v=' + VER + (i ? '&retry=' + i : ''), ctl ? { signal: ctl.signal } : undefined);
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const total = +r.headers.get('content-length') || 0;
+      if (!r.body){ const ab = await r.arrayBuffer(); clearInterval(dog); return ab; }
+      const reader = r.body.getReader(), chunks = []; let got = 0;
+      for (;;){ const { done, value } = await reader.read(); if (done) break; last = performance.now(); chunks.push(value); got += value.length; if (onProg) onProg(got, total); }
+      clearInterval(dog);
+      if (total && got !== total) throw new Error('資料不完整');
+      const buf = new Uint8Array(got); let o = 0; for (const c of chunks){ buf.set(c, o); o += c.length; }
+      return buf.buffer;
+    }catch(e){ clearInterval(dog); lastErr = e; console.warn('重試下載', url, e.message); await sleep(200 * (i + 1)); }
+  }
+  throw lastErr;
+}
+const fetchJSON = async url => JSON.parse(new TextDecoder().decode(await fetchBuf(url)));
+// 大檔案切成 3MB 小段同時下載，再組回來（避免單一大檔傳輸卡住）
+let PARTS = null;
+async function fetchParts(url, n, onProg){
+  const got = new Array(n).fill(0), tot = new Array(n).fill(0);
+  const bufs = await Promise.all(Array.from({ length: n }, (_, i) =>
+    fetchBuf(url + '.' + String(i).padStart(3, '0'), (g, t) => { got[i] = g; tot[i] = t; if (onProg) onProg(got.reduce((a, b) => a + b, 0), tot.every(Boolean) ? tot.reduce((a, b) => a + b, 0) : 0); })));
+  const size = bufs.reduce((a, b) => a + b.byteLength, 0), out = new Uint8Array(size);
+  let o = 0; for (const b of bufs){ out.set(new Uint8Array(b), o); o += b.byteLength; }
+  return out.buffer;
+}
+async function loadGLB(url, onProg){
+  if (PARTS === null) PARTS = await fetchJSON(BL + 'parts.json').catch(() => ({}));
+  const name = url.split('/').pop();
+  const buf = PARTS[name] ? await fetchParts(url, PARTS[name], onProg) : await fetchBuf(url, onProg);
+  return gltfLoader.parseAsync(buf, '');
+}
+async function loadBlenderMap(){
+  if (!served) return false;
+  let lmInfo = null;
+  try{ lmInfo = await fetchJSON(BL + 'lightmap.json'); }catch(e){ return false; }   // 沒有 Blender 地圖就改用即時產生
+  setupComposer(); applyQuality();
+  pmsg('載入地圖模型', 15);
+  const texL = new THREE.TextureLoader();
+  const loadTex = url => new Promise((res, rej) => texL.load(url, res, undefined, rej));
+  const lmSmall = await loadTex(BL + 'lightmap_small.webp?v=' + VER).catch(() => loadTex(BL + 'lightmap_small.webp?v=' + VER + '&retry=1'));
+  lmSmall.channel = 1; lmSmall.colorSpace = THREE.NoColorSpace;
+  LM = { size: lmInfo.size, tex: lmSmall };
+  const core = await loadGLB(BL + 'map_core.glb', (got, total) => { if (total) pmsg(`載入精緻區地圖（${(got / 1048576).toFixed(1)} / ${(total / 1048576).toFixed(1)} MB）`, 15 + 55 * got / total); });
+  pmsg('建立精緻區地圖', 75); await sleep(0);
+  tuneMaterials(core.scene, false); applyLightmap(core.scene); setupWater(core.scene);
+  world.add(core.scene);
+  loadMainBuilding(core.scene).catch(e => console.warn('主建築載入失敗', e));
+  pmsg('種植行道樹', 85); await sleep(0);
+  const nTrees = await loadTrees(HQ).catch(e => { console.warn('樹木載入失敗', e); return 0; });
+  // 高畫質光影與外圍在背景補上
+  loadTex(BL + 'lightmap.webp?v=' + VER).then(t => {
+    t.channel = 1; t.colorSpace = THREE.NoColorSpace; t.anisotropy = 4;
+    core.scene.traverse(o => { if (o.isMesh){ for (const m of (Array.isArray(o.material) ? o.material : [o.material])) if (m.lightMap){ m.lightMap = t; m.needsUpdate = true; } } });
+    LM.tex = t;
+  }).catch(() => {});
+  loadCars().catch(e => console.warn('車流載入失敗', e));
+  loadGLB(BL + 'map_outer.glb').then(g => { tuneMaterials(g.scene, true); setupWater(g.scene); world.add(g.scene); }).catch(e => console.warn('外圍載入失敗', e));
+  return { trees: nTrees };
+}
+
+async function boot(force = false){
+  try{
+    pmsg('準備中', 5);
+    const saved = LS.get('center-v2', null);
+    const c = saved ? { ...saved, note: '使用已校正的中心點' } : { ...SALES_CENTER, note: '接待中心位置：祥順路一段11號' };
+    setProjection(c);
+    await loadPoiConfig();
+    if (served) loadShops();
+    if (served) PHOTOS = await fetch('photos/credits.json?v=' + Date.now()).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+    // 優先使用 Blender 製作的地圖
+    const bl = force ? false : await loadBlenderMap().catch(e => { console.warn('Blender 地圖載入失敗，改用即時產生', e); return false; });
+    if (bl){
+      const cands = await fetchJSON(BL + 'poi_cands.json').catch(() => []); const names = await fetchJSON(BL + 'names.json').catch(() => []);
+      for (const n of names) nameInfo.set(n.name, n);
+      NEAR_NAMES = await fetchJSON(BL + 'near_names.json').catch(() => []);
+      WALK = await fetchJSON(BL + 'walk.json').catch(() => null);
+      COMMUTE = await fetchJSON(BL + 'commute.json').catch(() => null);
+      METRO = await fetchJSON(BL + 'metro.json').catch(() => null); buildFuture();
+      resolvePois(cands); buildPois();
+      buildNames(); buildRings(); buildMarker();
+      buildAgentChips();
+      pmsg('完成', 100);
+      await sleep(200);
+      $('loading').style.display = 'none';
+      toast(`Blender 精緻地圖已載入 · ${FOUND.length} 個周邊景點`, 4000);
+      flyTo(new THREE.Vector3(0, 0, 0), 1600, 0.85, 2600);
+      return;
+    }
+    const data = await loadData(c, force);
+    pmsg('建立道路、人行道與標線', 48); await sleep(0);
+    buildGround();
+    buildFlats(data.elements);
+    const n = await buildBuildings(data.elements);
+    pmsg('建立外圍房屋', 85); await sleep(0);
+    const n2 = buildOuter(data.outer);
+    resolvePois(data.poi); buildPois();
+    buildNames(); buildRings(); buildMarker();
+    buildAgentChips();
+    pmsg('完成', 100);
+    await sleep(300);
+    $('loading').style.display = 'none';
+    toast(`已建立 ${(n + n2).toLocaleString()} 棟房屋、${FOUND.length} 個周邊景點`, 5000);
+    flyTo(new THREE.Vector3(0, 0, 0), 1600, 0.85, 2600);
+  }catch(err){
+    console.error(err);
+    pmsg('地圖資料下載失敗：' + (err.message || err) + '。請確認網路連線後重新整理網頁。');
+  }
+}
+
+/* ================== 相機動畫與操作 ================== */
+let anim = null;
+function flyTo(target, dist, polar, ms = 1400, az){
+  const sph = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+  let th = az ?? sph.theta;
+  while (th - sph.theta > Math.PI) th -= Math.PI * 2;
+  while (th - sph.theta < -Math.PI) th += Math.PI * 2;
+  const from = { t: controls.target.clone(), r: sph.radius, phi: sph.phi, th: sph.theta };
+  const to = { t: target.clone(), r: dist, phi: polar, th };
+  const t0 = performance.now();
+  cancelAnim();
+  return new Promise(res => {
+    anim = now => {
+      let k = Math.min(1, (now - t0) / ms); k = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      controls.target.lerpVectors(from.t, to.t, k);
+      // 長距離時先拉高再降下，像無人機飛過去
+      const lift = Math.sin(k * Math.PI) * Math.min(1800, from.t.distanceTo(to.t) * 0.6);
+      const s = new THREE.Spherical(from.r + (to.r - from.r) * k + lift, from.phi + (to.phi - from.phi) * k, from.th + (to.th - from.th) * k);
+      camera.position.copy(controls.target).add(new THREE.Vector3().setFromSpherical(s));
+      if (k >= 1){ anim = null; res(); }
+    };
+    anim.done = res;
+  });
+}
+// 中斷目前的鏡頭動畫（讓等待中的流程繼續，不會卡住）
+function cancelAnim(){ if (anim){ const a = anim; anim = null; a.done && a.done(); } }
+const goHome = () => { routeGroup.clear(); hidePhoto(); clearShops(); return flyTo(new THREE.Vector3(0, 0, 0), 420, 0.9); };
+$('bHome').onclick = goHome;
+$('bTop').onclick = () => flyTo(controls.target.clone(), 3200, 0.001);
+$('bBird').onclick = () => flyTo(controls.target.clone(), 2200, Math.PI / 4);
+$('bOrbit').onclick = e => { controls.autoRotate = !controls.autoRotate; controls.autoRotateSpeed = 0.6; e.currentTarget.classList.toggle('on', controls.autoRotate); };
+$('bRings').onclick = e => { ringsGroup.visible = !ringsGroup.visible; e.currentTarget.classList.toggle('on', ringsGroup.visible); };
+$('bNames').onclick = e => { namesGroup.visible = !namesGroup.visible; hwyGroup.visible = namesGroup.visible; e.currentTarget.classList.toggle('on', namesGroup.visible); };
+$('bPois').onclick = e => { poiGroup.visible = !poiGroup.visible; e.currentTarget.classList.toggle('on', poiGroup.visible); };
+$('bCars').onclick = e => { CARS.on = !CARS.on; LS.set('cars', CARS.on); if (CARS.body) CARS.body.visible = CARS.glass.visible = CARS.on; e.currentTarget.classList.toggle('on', CARS.on); };
+$('bCars').classList.toggle('on', CARS.on);
+$('bBus').onclick = e => { BUS_ON = !BUS_ON; LS.set('bus', BUS_ON); busGroup.visible = BUS_ON; e.currentTarget.classList.toggle('on', BUS_ON); };
+$('bBus').classList.toggle('on', BUS_ON);
+$('bHQ').onclick = () => { HQ = !HQ; LS.set('hq', HQ); applyQuality(); toast(HQ ? '高畫質：陰影與環境遮蔽已開啟' : '標準畫質：比較省電、手機較順'); };
+
+function openVR(){ if (window.SITE_PAGES && window.SITE_PAGES.vr){ location.href = window.SITE_PAGES.vr; return; } if (!VR_URL){ toast('請先到「設定」填入 A5 戶 VR 網頁位置'); return; } location.href = VR_URL; }
+const setView = id => ['bTop', 'bBird'].forEach(k => $(k).classList.toggle('act', k === id));
+$('bTop').addEventListener('click', () => setView('bTop'));
+$('bBird').addEventListener('click', () => setView('bBird'));
+$('layHd').onclick = () => $('layers').classList.toggle('closed');
+if (innerWidth < 760) $('layers').classList.add('closed');
+$('bMenu').onclick = () => document.body.classList.toggle('menu-open');
+$('bHelp').onclick = () => { $('mHelp').style.display = 'flex'; };
+$('helpOK').onclick = () => { $('mHelp').style.display = 'none'; };
+$('mHelp').onclick = e => { if (e.target.id === 'mHelp') $('mHelp').style.display = 'none'; };
+for (const k of ['bModel', 'bFix']) $(k).addEventListener('click', () => { $('mSet').style.display = 'none'; });
+function setNav(k){ document.querySelectorAll('#nav button').forEach(b => b.classList.toggle('act', b.dataset.k === k)); }
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
+  const k = b.dataset.k; setNav(k); document.body.classList.remove('menu-open');
+  if (k === 'pos'){ if (AG.open) stopTour(); goHome(); return; }
+  openAgent(true); stopTour(); stopSpeak();
+  const pick = ids => ids.filter(poiById);
+  if (k === 'poi') return runTour(FOUND.map(p => p.id), '好的，我依序帶您看看接待中心周邊的設施。');
+  if (k === 'traffic') return showCommute(null, true);
+  if (k === 'walk') return showWalk(true);
+  if (k === 'future') return showFuture(true);
+  if (k === 'view'){ closeAgent(); return openSim(); }
+  if (k === 'school') return runTour(pick(['xinguang_es', 'xinguang_jh', 'xiangshun_park', 'dongying_park', 'pinglin']), '好的，我帶您看看附近的學校和公園。');
+  if (k === 'life') return answerShop({ cats: ['711', 'family', 'hilife', 'ok', 'conv'], label: '便利商店' });
+});
+$('bVR').onclick = openVR; $('cardVR').onclick = openVR;
+$('cardX').onclick = $('cardClose').onclick = () => $('card').style.display = 'none';
+
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let fixMode = false, downXY = null;
+renderer.domElement.addEventListener('pointerdown', e => { downXY = [e.clientX, e.clientY]; if (!AG.tour) cancelAnim(); });
+renderer.domElement.addEventListener('pointerup', e => {
+  if (!downXY || Math.hypot(e.clientX - downXY[0], e.clientY - downXY[1]) > 5) return;
+  mouse.set(e.clientX / innerWidth * 2 - 1, -e.clientY / innerHeight * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  if (fixMode){
+    const p = new THREE.Vector3();
+    if (ray.ray.intersectPlane(new THREE.Plane(new THREE.Vector3(0, 1, 0), 0), p)){
+      LS.set('center-v2', { lat: C.lat - p.z / KY, lon: C.lon + p.x / KX });
+      toast('中心點已更新，重新建立地圖…'); setTimeout(() => location.reload(), 900);
+    }
+    return;
+  }
+  if (facGroup.visible){ const hf = ray.intersectObjects(facGroup.children, true).find(h => h.object.userData.fac !== undefined); if (hf){ showFacItem(hf.object.userData.fac); return; } }
+  if (busGroup.visible){ const hb = ray.intersectObjects(busGroup.children, true).find(h => h.object.userData.bus !== undefined); if (hb){ showBusStop(hb.object.userData.bus); return; } }
+  const hs = ray.intersectObjects(shopGroup.children, true).find(h => h.object.userData.shop !== undefined);
+  if (hs){ openAgent(true); focusShop(hs.object.userData.shop, true); return; }
+  const hp = ray.intersectObjects(poiGroup.children, true).find(h => h.object.userData.poi);
+  if (hp){ const p = poiById(hp.object.userData.poi); if (p){ openAgent(true); stopTour(); introducePoi(p); } return; }
+  const hits = ray.intersectObjects(markerGroup.children, true);
+  if (hits.some(h => h.object.userData.click || h.object.parent?.userData.click)) $('card').style.display = 'block';
+});
+$('bFix').onclick = e => { fixMode = !fixMode; e.currentTarget.classList.toggle('on', fixMode); toast(fixMode ? '請在地圖上點一下接待中心的正確位置' : '已取消校正'); };
+
+$('bSet').onclick = () => { $('shareUrl').value = LS.get('shareUrl', ''); $('vrUrl').value = VR_URL; $('mSet').style.display = 'flex'; };
+$('setOK').onclick = () => { LS.set('shareUrl', $('shareUrl').value.trim()); VR_URL = $('vrUrl').value.trim(); LS.set('vrUrl', VR_URL); $('mSet').style.display = 'none'; };
+$('scX').onclick = () => clearShops();
+if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) $('bShops').style.display = 'none';   // 雲端版不提供（需要本機伺服器）
+$('bShops').onclick = async () => {
+  if (!served){ toast('請用「開啟鳥瞰地圖.bat」開啟網頁後再更新'); return; }
+  const b = $('bShops'); b.disabled = true; b.textContent = '下載中…（約 30–60 秒）';
+  try{
+    const data = await fetchShopsOSM();
+    const r = await fetch(API + 'save-shops', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
+    if (r.status === 404) throw new Error('伺服器是舊版：請關閉伺服器視窗，再雙擊「開啟鳥瞰地圖.bat」一次');
+    if (!r.ok) throw new Error('存檔失敗 HTTP ' + r.status);
+    SHOPS = data; buildBus(); buildFac(); toast(`周邊店家已更新：共 ${data.items.length} 家（${data.updated}）`, 5000);
+  }catch(e){ toast('更新失敗：' + (e.message || e), 7000); }
+  b.disabled = false; b.textContent = '更新周邊店家';
+};
+$('bRedl').onclick = async () => { await idb.set('osm-v3', null); try{ localStorage.removeItem('center-v2'); }catch(e){} location.href = location.pathname + '?refresh=1'; };
+
+/* ================== 秉和昕心大樓模型 ================== */
+let bldModel = null, MAIN_BLDG = false; const BLDG_BAKED = [];
+// 主建築（SketchUp 原始模型轉檔：map/blender/building.glb），放在接待中心位置
+async function loadMainBuilding(core){
+  const g = await loadGLB(BL + 'building.glb');
+  core.traverse(o => { if (/預留量體/.test(o.name)) o.visible = false; });
+  g.scene.traverse(o => {
+    if (!o.isMesh) return;
+    o.castShadow = true; o.receiveShadow = true;
+    const m = o.material;
+    if (/烘焙/.test(o.name + (m.name || ''))){
+      // Blender 烘焙好的光影貼圖：直接顯示，不再重複打光（日照模擬時改用即時光）
+      if (m.map){ m.map.anisotropy = 8; m.map.colorSpace = THREE.SRGBColorSpace; }
+      o.userData.bakedMat = new THREE.MeshBasicMaterial({ map: m.map, side: THREE.DoubleSide });
+      o.userData.liveMat = new THREE.MeshStandardMaterial({ map: m.map, roughness: 0.85, metalness: 0, envMapIntensity: 0.25, side: THREE.DoubleSide });
+      o.material = o.userData.bakedMat; o.receiveShadow = false; BLDG_BAKED.push(o);
+    } else if (/玻璃/.test(o.name + (m.name || ''))){
+      o.material = new THREE.MeshPhysicalMaterial({ color: '#1c2f3c', roughness: 0.06, metalness: 0.2, envMapIntensity: 0.55, transparent: true, opacity: 0.92, side: THREE.DoubleSide });
+    } else { m.envMapIntensity = 0.35; if (m.transparent){ m.depthWrite = false; m.envMapIntensity = 0.9; } }
+  });
+  bldModel = new THREE.Group(); bldModel.add(g.scene); scene.add(bldModel);
+  // 對齊祥順路一段：轉 9.1 度，基地南邊貼齊路緣（蓋住人行道）
+  bldModel.position.set(2.48, 0, -3.87);   // 等比放大 1.09 倍填滿空地（不壓到後方人行道）
+  MAIN_BLDG = true; if (placeholder) placeholder.visible = false; if (centerBldMesh) centerBldMesh.visible = false;
+  applyModelTf();
+}
+$('bModel').onclick = () => $('fModel').click();
+$('fModel').onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  toast('載入模型中…');
+  const buf = await f.arrayBuffer();
+  new GLTFLoader().parse(buf, '', gltf => {
+    if (bldModel) scene.remove(bldModel);
+    bldModel = new THREE.Group(); bldModel.add(gltf.scene);
+    gltf.scene.traverse(o => { if (o.isMesh) o.castShadow = o.receiveShadow = true; });
+    const box = new THREE.Box3().setFromObject(gltf.scene), ctr = box.getCenter(new THREE.Vector3());
+    gltf.scene.position.set(-ctr.x, -box.min.y, -ctr.z);
+    scene.add(bldModel);
+    placeholder.visible = false; if (centerBldMesh) centerBldMesh.visible = false;
+    applyModelTf();
+    const size = box.getSize(new THREE.Vector3());
+    toast(`模型已放入（約 ${size.x.toFixed(0)}×${size.z.toFixed(0)} 公尺，高 ${size.y.toFixed(0)} 公尺）。可在「設定」調整角度與縮放`, 5000);
+    flyTo(new THREE.Vector3(0, size.y * 0.3, 0), Math.max(200, size.y * 4), 1.0);
+  }, err => toast('模型載入失敗：' + err.message));
+};
+function applyModelTf(){
+  if (!bldModel) return;
+  const r = +$('rot').value, s = +$('scl').value;
+  $('rotV').textContent = r; $('sclV').textContent = s.toFixed(2);
+  bldModel.rotation.y = 0.1594 + r * Math.PI / 180; bldModel.scale.setScalar(1.09 * s);
+}
+$('rot').oninput = $('scl').oninput = applyModelTf;
+
+/* ================== AI 代銷：小昕（沿用 A5 戶網頁的角色、AI 與語音） ================== */
+const KB = `【建案】秉和昕心，秉和建設投資興建。接待會館：臺中市太平區祥順路一段11號。地上15層、地下4層，1棟，住家89戶與店面1戶；規劃1到3房，約22到44坪；平面車位，配比約1比1.14，設有電動車充電設備(含預留)；預計2027年第四季完工(以建商公告為準)。位於太平「新光」生活圈，鄰近公園與重劃區。
+【周邊(依公開報導，時間為約略)】學區：新光國小、新光國中(實際學區以教育局公告為準)。生活：中興路家樂福商圈、太平區公所、太平運動場一帶機能完整；往一中商圈、三井LaLaport可走振興路、樂業路。交通：台74線快速道路可串聯台中市區，形成環台中生活圈；鄰近台鐵精武車站。休閒：區內有坪林森林公園等綠地。
+【未來願景】台中捷運藍線(台中港到台中車站)推動中；藍線延伸太平線規劃從東平路經中興東路、中興路、太平路、振興路到進德路，在帝國糖廠站銜接藍線，約4.66公里、地下化4站，目前可行性研究送中央審議中、尚未核定。`;
+function rulesMap(){
+  const list = FOUND.map(p => `${p.id}｜${p.name}｜離接待中心${distText(p.d)}｜${p.intro}`).join('\n');
+  return `你是「小昕」，秉和昕心建案的AI代銷小姐，正在網頁3D鳥瞰地圖旁邊，帶客戶看接待中心周邊環境。
+說話規則：
+1. 只用繁體中文(台灣用語)，親切專業、像真人代銷，第一人稱「我」，稱呼「您」。
+2. 每次回答2到4句、120字以內，會被語音唸出來，不要條列、不要表情符號、不要網址。
+3. 只根據下方資料與景點清單介紹；資料沒有的不要編造，說「這部分我請專人提供詳細資料給您」。距離只能用清單上的直線距離，不要自己說開車或走路幾分鐘。未核定的建設要說明「規劃中」。
+4. 絕對不談價格、單價、總價、行情、折扣、貸款、投資報酬或增值預測，被問到就說會請專人顧問說明。
+5. 地圖可以飛到景點上空：
+   - 客戶想看或你介紹的是單一景點，fly 填那個景點的 id；想回到接待中心填 "center"；不用移動填 null。
+   - 客戶問「附近有哪些景點」「周邊有什麼」「帶我看看」這類要逛好幾個地方的問題，請從清單挑出最相關的3到6個，依由近到遠或合理的參觀順序排好，把 id 依序放進 tour；這時 say 只要說一句開場白，例如「好的，我依序帶您看看」，每個景點的介紹地圖會自動唸。
+   - 客戶問特定類型(例如學校、公園、交通、購物)而清單有好幾個符合，也可以用 tour 依序帶看。
+只回覆一個 JSON：{"say":"要說的話","gesture":"wave|point|explain|happy|think|bow","fly":null,"tour":[],"chips":["追問1","追問2","追問3"]}
+chips 每個10字以內。
+景點清單(id｜名稱｜距離｜介紹)：
+${list || '(目前沒有景點)'}
+建案資料：
+${KB}`;
+}
+const PRICE_RE = /價|多少錢|行情|單價|總價|一坪|每坪|房價|優惠|折扣|成交|實價|貸款|頭期|付款|自備款|成數|划算|增值|投報/;
+const TOUR_RE = /景點|周邊有|附近有什麼|附近有哪些|周圍|帶我看|導覽|逛逛|環境/;
+const TYPE_TOURS = [
+  [/學校|學區|上學|國中|國小/, ['xinguang_es', 'xinguang_jh']],
+  [/公園|綠地|散步|運動/, ['xiangshun_park', 'dongying_park', 'pinglin', 'taiping_sports']],
+  [/交通|快速道路|通勤|火車|車站/, ['hwy74', 'jingwu']],
+  [/購物|逛街|商圈|買菜|百貨/, ['carrefour', 'lalaport']]
+];
+const AG = { open: false, turns: [], busy: false, speakId: 0, tour: false };
+const girl = document.createElement('div');   // 嘴型狀態（Live2D 讀取）
+const agText = $('agText');
+
+const L2D = { model: null, app: null, mouth: 0, wave: 0, think: 0, ready: false };
+async function initLive2D(){
+  if (L2D.app || !window.PIXI || !PIXI.live2d || !window.Live2DCubismCore) return;
+  try{
+    const W = 460, H = 660;
+    const app = new PIXI.Application({ view: $('l2d'), width: W, height: H, backgroundAlpha: 0, antialias: true, resolution: Math.min(2, devicePixelRatio || 1), autoDensity: false });
+    $('l2d').style.width = ''; $('l2d').style.height = '';
+    L2D.app = app;
+    const m = await PIXI.live2d.Live2DModel.from('../live2d/Haru/Haru.model3.json', { autoInteract: false });
+    const sc = (H * 1.95) / m.internalModel.originalHeight;
+    m.scale.set(sc); m.x = (W - m.width) / 2; m.y = H * 0.02;
+    app.stage.addChild(m); L2D.model = m;
+    const core = m.internalModel.coreModel;
+    m.internalModel.on('beforeModelUpdate', () => {
+      let v = 0;
+      if (girl.classList.contains('talk')){
+        if (AUD.an && AUD.cur && !AUD.cur.paused && !AUD.cur.ended){ AUD.an.getByteTimeDomainData(AUD.buf); let q = 0; for (const x of AUD.buf){ const d = (x - 128) / 128; q += d * d; } v = Math.min(1, Math.sqrt(q / AUD.buf.length) * 5); }
+        else { const t = performance.now() / 1000; v = Math.max(0, .55 + .45 * Math.sin(t * 17) * Math.sin(t * 5.3)); }
+      }
+      L2D.mouth += (v - L2D.mouth) * .5; core.setParameterValueById('ParamMouthOpenY', L2D.mouth);
+      const lerp = (id, to, e) => { const c = core.getParameterValueById(id); core.setParameterValueById(id, c + (to - c) * e); };
+      if (L2D.wave){
+        const t = (performance.now() - L2D.wave) / 1000, D = 2.6;
+        if (t > D) L2D.wave = 0; else {
+          const e = Math.min(1, t / .35, (D - t) / .35);
+          core.setPartOpacityById('Part01ArmRB001', 1); core.setPartOpacityById('Part01ArmRA001', 0);
+          lerp('ParamArmRB', 4.2, e); core.setParameterValueById('ParamHandAngleR', Math.sin(t * Math.PI * 4.4) * e);
+          lerp('ParamEyeLSmile', .9, e); lerp('ParamEyeRSmile', .9, e); lerp('ParamMouthForm', 1, e);
+          lerp('ParamBodyAngleZ', -5, e); lerp('ParamAngleZ', 6 + 3 * Math.sin(t * Math.PI * 2.2), e);
+        }
+      }
+      if (L2D.think){
+        const t = (performance.now() - L2D.think) / 1000, e = Math.min(1, t / .4);
+        lerp('ParamAngleZ', -10, e); lerp('ParamAngleX', 8, e); lerp('ParamEyeBallX', .5, e); lerp('ParamEyeBallY', .7, e); lerp('ParamBodyAngleZ', 3, e);
+      }
+    });
+    $('l2d').addEventListener('pointerdown', () => l2dMotion(Math.floor(Math.random() * 4)));
+    L2D.ready = true; $('agent').classList.add('l2d');
+    if (!AG.open) app.ticker.stop();
+  }catch(e){ console.warn('Live2D 載入失敗，改用頭像', e); }
+}
+function l2dMotion(i){ try{ L2D.model && L2D.model.motion('TapBody', i, 3); }catch(_){} }
+function l2dExpr(n){ try{ L2D.model && L2D.model.expression(n); }catch(_){} }
+const L2D_MAP = { wave: () => { L2D.wave = performance.now(); }, happy: () => { l2dExpr('F05'); l2dMotion(0); }, explain: () => l2dMotion(1), point: () => l2dMotion(2), bow: () => l2dMotion(3) };
+let lastG = null;
+function setGesture(g){
+  if (!L2D.ready) return;
+  L2D.think = g === 'think' ? (L2D.think || performance.now()) : 0;
+  if (!g){ if (lastG === 'happy') l2dExpr('F01'); lastG = null; return; }
+  if (g === lastG) return; lastG = g;
+  (L2D_MAP[g] || (() => {}))();
+}
+
+// 語音：有本機伺服器用小晴語音（edge-tts），沒有就用瀏覽器語音
+let zhVoice = null;
+function pickVoice(){
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices();
+  zhVoice = vs.find(v => /HsiaoChen/i.test(v.name) && /Natural|Online/i.test(v.name)) || vs.find(v => /zh[-_]TW/i.test(v.lang) && /Natural|Online/i.test(v.name)) || vs.find(v => /zh[-_]TW/i.test(v.lang)) || vs.find(v => /^zh/i.test(v.lang)) || null;
+}
+if ('speechSynthesis' in window){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+const talking = on => girl.classList.toggle('talk', on);
+let SRV = null;
+if (served) fetch(API + 'ping', { cache: 'no-store' }).then(r => r.ok ? r.json() : null).then(j => { if (j && j.ok) SRV = j; }).catch(() => {});
+const AUD = { cur: null, an: null, buf: null, ctx: null };
+const TTS_CACHE = new Map();
+function ttsFetch(t){
+  if (!TTS_CACHE.has(t)){
+    const p = fetch(API + 'tts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: t }) })
+      .then(r => r.ok ? r.blob() : null).catch(() => null);
+    TTS_CACHE.set(t, p); if (TTS_CACHE.size > 80) TTS_CACHE.delete(TTS_CACHE.keys().next().value);
+  }
+  return TTS_CACHE.get(t);
+}
+function audioCtx(){ try{ const Cx = AUD.ctx || (AUD.ctx = new (window.AudioContext || window.webkitAudioContext)()); if (Cx.state === 'suspended') Cx.resume(); return Cx; }catch(_){ return null; } }
+function playBlob(blob, id){
+  return new Promise(res => {
+    if (id !== AG.speakId) return res();
+    const url = URL.createObjectURL(blob), a = new Audio(url); AUD.cur = a;
+    try{ const Cx = audioCtx(); if (Cx){ const src = Cx.createMediaElementSource(a), an = Cx.createAnalyser(); an.fftSize = 512; src.connect(an); an.connect(Cx.destination); AUD.an = an; AUD.buf = new Uint8Array(an.fftSize); } }catch(_){ AUD.an = null; }
+    const fin = () => { URL.revokeObjectURL(url); if (AUD.cur === a) AUD.cur = null; res(); };
+    a.onended = fin; a.onerror = fin; a.onplay = () => talking(true);
+    a.play().catch(fin);
+  });
+}
+const splitSent = text => (text.match(/[^。！？!?]+[。！？!?]?/g) || [text]).map(x => x.trim()).filter(Boolean);
+function speak(text){
+  const id = ++AG.speakId;
+  const parts = splitSent(text);
+  if (SRV && SRV.tts){
+    return (async () => {
+      const blobs = parts.map(ttsFetch);
+      for (let i = 0; i < parts.length; i++){
+        const b = await blobs[i];
+        if (id !== AG.speakId) return;
+        if (!b){ await browserSpeak(parts.slice(i), id); return; }
+        await playBlob(b, id);
+      }
+      if (id === AG.speakId) talking(false);
+    })();
+  }
+  return browserSpeak(parts, id);
+}
+function browserSpeak(parts, id){
+  const text = parts.join('');
+  return new Promise(done => {
+    const fallback = () => { talking(true); setTimeout(() => { if (id === AG.speakId) talking(false); done(); }, Math.min(12000, 300 + text.length * 170)); };
+    if (!('speechSynthesis' in window)) return fallback();
+    try{
+      speechSynthesis.cancel();
+      let i = 0, started = false;
+      const next = () => {
+        if (id !== AG.speakId) return done();
+        if (i >= parts.length){ talking(false); return done(); }
+        const u = new SpeechSynthesisUtterance(parts[i++]);
+        u.lang = 'zh-TW'; if (zhVoice) u.voice = zhVoice;
+        u.rate = 1.05;
+        u.onstart = () => { started = true; talking(true); };
+        u.onend = next; u.onerror = next;
+        speechSynthesis.speak(u);
+      };
+      next();
+      setTimeout(() => { if (!started && id === AG.speakId){ speechSynthesis.cancel(); fallback(); } }, 1500);
+    }catch(_){ fallback(); }
+  });
+}
+function stopSpeak(){ AG.speakId++; try{ speechSynthesis.cancel(); }catch(_){} if (AUD.cur){ try{ AUD.cur.pause(); }catch(_){} AUD.cur = null; } talking(false); }
+
+function setChips(list){
+  const box = $('agChips'); box.innerHTML = '';
+  const tb = document.createElement('button'); tb.type = 'button'; tb.id = 'agTour';
+  tb.textContent = AG.tour ? '■ 停止導覽' : '▶ 周邊景點導覽'; tb.setAttribute('aria-pressed', AG.tour ? 'true' : 'false');
+  tb.onclick = () => AG.tour ? stopTour(true) : runTour(FOUND.map(p => p.id), '好的，我依序帶您看看接待中心周邊的景點。');
+  box.appendChild(tb);
+  (list || []).slice(0, 4).forEach(c => { const b = document.createElement('button'); b.type = 'button'; b.textContent = c; b.onclick = () => ask(c); box.appendChild(b); });
+}
+function defaultChips(){
+  const names = FOUND.filter(p => p.d > 150).slice(0, 2).map(p => p.name.replace('三井 ', ''));
+  return ['附近有哪些景點', '到高鐵要多久', '走路10分鐘有什麼', '7-11在哪裡'];
+}
+function buildAgentChips(){ if (AG.open) setChips(defaultChips()); }
+async function say(text, gesture, chips){
+  agText.textContent = text; setGesture(gesture || 'explain'); if (chips) setChips(chips);
+  await speak(text);
+  if (!AG.busy) setGesture(null);
+}
+
+// 單一景點：飛過去、小昕介紹
+// 景點照片（photos/credits.json 列出的才顯示；之後可自行放照片進 photos 資料夾）
+let PHOTOS = {};
+function showPhoto(p){
+  const c = p && PHOTOS[p.id];
+  if (!c){ hidePhoto(); return; }
+  const img = $('ppImg');
+  img.onload = () => $('poiPhoto').classList.add('show');
+  img.src = 'photos/' + p.id + '.jpg?v=' + VER; img.alt = p.name + ' 照片';
+  $('ppName').textContent = p.name;
+  $('ppDist').textContent = p.d < 400 ? `距接待中心約 ${Math.max(50, Math.round(p.d / 50) * 50)} 公尺` : `距接待中心直線約 ${(p.d / 1000).toFixed(1)} 公里`;
+  $('ppCr').textContent = c.self ? '' : `照片：${c.artist}／${c.lic}（維基共享資源）`;
+}
+function hidePhoto(){ $('poiPhoto').classList.remove('show'); }
+async function introducePoi(p, chips){
+  $('agWhere').textContent = '小昕 · 正在介紹 ' + p.name;
+  $('shopCard').classList.remove('show');
+  showPhoto(p);
+  const fly = flyToPoi(p);
+  await say(p.intro, 'point', chips || (AG.tour ? null : defaultChips()));
+  await fly;
+}
+// 多個景點依序導覽
+async function runTour(ids, opening){
+  const list = [...new Set(ids)].map(poiById).filter(Boolean);
+  if (!list.length){ await say('目前地圖上還沒有可以介紹的景點，我請專人提供周邊資料給您。', 'bow'); return; }
+  stopSpeak(); AG.tour = true; setChips([]); clearShops();
+  if (opening) await say(opening, 'wave', null);
+  for (const p of list){
+    if (!AG.tour) return;
+    await introducePoi(p, null);
+    if (!AG.tour) return;
+    await sleep(900);
+  }
+  if (!AG.tour) return;
+  AG.tour = false;
+  goHome();
+  $('agWhere').textContent = '小昕 · 秉和昕心 AI 代銷';
+  await say('以上就是周邊的重點景點，我們再回到接待中心。想再看哪裡，或想進A5戶樣品屋看看，都可以跟我說喔。', 'happy', ['再看LaLaport', '學校在哪裡', '進入A5戶VR']);
+}
+function stopTour(user){
+  if (!AG.tour) return;
+  AG.tour = false; stopSpeak(); setChips(defaultChips());
+  if (user) agText.textContent = '好的，導覽先停在這裡，想看哪裡都可以問我。';
+}
+function matchPoi(q){
+  const s = q.toLowerCase();
+  return FOUND.find(p => (p.alias || []).some(a => s.includes(String(a).toLowerCase())) || s.includes(p.name.toLowerCase()));
+}
+function localAnswer(q){
+  if (/接待中心|回來|回去|這裡/.test(q)) return { say: '這裡就是秉和昕心接待中心，位在祥順路一段，正前方是廍子溪，旁邊就是祥順運動公園。', gesture: 'point', fly: 'center' };
+  if (/捷運/.test(q)) return { say: '台中捷運藍線規劃延伸到太平，目前可行性研究還在中央審議中、尚未核定，是很值得期待的建設。', gesture: 'explain' };
+  return { say: '這個問題我先記下來，會請專人提供詳細資料給您。您也可以問我附近有哪些景點，或直接說 LaLaport、學校、公園，我帶您飛過去看。', gesture: 'think' };
+}
+async function ask(q){
+  q = String(q || '').trim(); if (!q || AG.busy) return;
+  stopTour(); stopSpeak(); $('agInput').value = '';
+  if (/a5|樣品屋|進入.*vr|看房子/i.test(q)){ await say('好的，我帶您進入A5戶的3D樣品屋，可以走進去看看喔。', 'happy'); openVR(); return; }
+  if (PRICE_RE.test(q)){ await say('價格會依市場行情和樓層戶別調整，為了給您最準確的資訊，我請專人顧問為您說明喔！', 'bow', defaultChips()); return; }
+  const AI = SRV && SRV.gemini;
+  // 只說景點名稱（例如「拉拉Po」「LaLaport在哪」）：直接飛過去，用準備好的介紹，最快也最準確
+  const quick = matchPoi(q);
+  const cm = commuteQuery(q); if (cm) return showCommute(cm, true);
+  if (/走路|步行|生活圈|走得到|幾分鐘走/.test(q)) return showWalk(true);
+  if (/捷運|藍線|未來建設|重大建設|未來規劃/.test(q)) return showFuture(true);
+  if (/景觀|看出去|視野|西曬|日照|採光|座向/.test(q)){ closeAgent(); return openSim(); }
+  if (/預約|賞屋|看屋|留資料|聯絡/.test(q)){ await say('好的，請在畫面上留下您的聯絡方式，專人會盡快與您聯繫安排賞屋喔。', 'happy', defaultChips()); return openLead(); }
+  const busQ = /公車|巴士|站牌|客運/.test(q);
+  if (quick && !busQ && q.length <= 12 && !TOUR_RE.test(q)) return introducePoi(quick);
+  // 問便利商店、五金行、公車站等：直接查資料、標在地圖上
+  const sq = (!quick || busQ) && shopQuery(q); if (sq) return answerShop(sq);
+  // 沒有 AI 時：用關鍵字判斷
+  if (!AI){
+    if (TOUR_RE.test(q)) return runTour(FOUND.map(p => p.id), '好的，我依序帶您看看接待中心周邊的景點。');
+    const one = matchPoi(q); if (one) return introducePoi(one);
+    for (const [re, ids] of TYPE_TOURS) if (re.test(q)){ const ok = ids.filter(poiById); if (ok.length > 1) return runTour(ok, '好的，我帶您看看附近的這幾個地方。'); if (ok.length) return introducePoi(poiById(ok[0])); }
+    const r = localAnswer(q); if (r.fly === 'center') goHome();
+    return say(r.say, r.gesture, defaultChips());
+  }
+  // 有 AI 時：小昕自己判斷要飛哪裡、要不要依序導覽
+  AG.busy = true; setGesture('think'); agText.textContent = '讓我想一下…'; setChips([]);
+  AG.turns.push({ role: 'user', content: q });
+  const turns = AG.turns.slice(-8); if (turns[0].role !== 'user') turns.shift();
+  let r = null;
+  try{
+    const res = await fetch(API + 'ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system: rulesMap(), messages: turns }) });
+    r = res.ok ? await res.json() : null;
+    if (!r || typeof r.say !== 'string') throw new Error('bad');
+    AG.turns.push({ role: 'assistant', content: r.say });
+  }catch(_){
+    AG.turns.pop(); AG.busy = false;
+    const one = matchPoi(q); if (one) return introducePoi(one);
+    if (TOUR_RE.test(q)) return runTour(FOUND.map(p => p.id), '好的，我依序帶您看看接待中心周邊的景點。');
+    r = localAnswer(q);
+  }
+  AG.busy = false;
+  const tour = Array.isArray(r.tour) ? r.tour.filter(poiById) : [];
+  if (tour.length > 1) return runTour(tour, r.say);
+  const target = tour.length ? tour[0] : r.fly;
+  if (target === 'center') goHome();
+  else if (target && poiById(target)){
+    const p = poiById(target);
+    $('agWhere').textContent = '小昕 · 正在介紹 ' + p.name;
+    showPhoto(p); flyToPoi(p);
+  }
+  await say(r.say, r.gesture, r.chips && r.chips.length ? r.chips : defaultChips());
+}
+$('agForm').onsubmit = e => { e.preventDefault(); ask($('agInput').value); };
+
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+$('agMic').onclick = () => {
+  if (!SR){ agText.textContent = '這個瀏覽器不支援語音辨識，請用文字輸入，或改用 Chrome／Edge。'; return; }
+  if (rec){ rec.stop(); return; }
+  stopTour(); stopSpeak();
+  rec = new SR(); rec.lang = 'zh-TW'; rec.interimResults = true; rec.maxAlternatives = 1;
+  $('agMic').setAttribute('aria-pressed', 'true'); setGesture('think'); agText.textContent = '我在聽，請說…';
+  let finalText = '';
+  rec.onresult = ev => { let t = ''; for (const x of ev.results){ t += x[0].transcript; if (x.isFinal) finalText = t; } $('agInput').value = t; };
+  rec.onerror = ev => { agText.textContent = /not-allowed/.test(ev.error) ? '這個頁面沒有麥克風權限，請用文字輸入。' : '沒有聽清楚，請再說一次或用文字輸入。'; };
+  rec.onend = () => { $('agMic').setAttribute('aria-pressed', 'false'); rec = null; setGesture(null); const t = finalText || $('agInput').value; if (t.trim()) ask(t); };
+  try{ rec.start(); }catch(_){ rec = null; $('agMic').setAttribute('aria-pressed', 'false'); }
+};
+
+function openAgent(quiet){
+  if (AG.open) return;
+  AG.open = true; $('agent').hidden = false; document.body.classList.add('ag-open');
+  if (L2D.app) L2D.app.ticker.start(); else initLive2D();
+  $('agent').classList.remove('in'); void $('agent').offsetWidth; $('agent').classList.add('in');
+  setChips(defaultChips());
+  if (!quiet) say('您好，我是秉和昕心的AI代銷小昕！這是接待中心周邊3.5公里的實景地圖，想看哪個景點都可以問我，例如問我附近有哪些景點，我會一個一個帶您飛過去看。', 'wave');
+}
+function closeAgent(){ hidePhoto(); AG.open = false; stopTour(); stopSpeak(); if (L2D.app) L2D.app.ticker.stop(); $('agent').hidden = true; document.body.classList.remove('ag-open'); }
+$('bAgent').onclick = () => AG.open ? closeAgent() : openAgent();
+$('agClose').onclick = closeAgent;
+setTimeout(initLive2D, 3000);
+
+
+/* ================== 步行生活圈（沿真實道路 5／10／15 分鐘）================== */
+let WALK = null, COMMUTE = null, METRO = null;
+const walkLabels = new THREE.Group(); scene.add(walkLabels);
+const WALK_STYLE = { 5: ['#3fbf7f', '#23935c', .15], 10: ['#e3b04b', '#b8862a', .11], 15: ['#4a8fe0', '#2f66b0', .08] };
+function inPoly(x, y, ring){ let c = false; for (let i = 0, j = ring.length - 1; i < ring.length; j = i++){ const [xi, yi] = ring[i], [xj, yj] = ring[j]; if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) c = !c; } return c; }
+function inBand(b, x, north){ return b.polys.some(p => inPoly(x, north, p.outer) && !p.holes.some(h => inPoly(x, north, h))); }
+function buildWalk(){
+  walkLabels.clear();
+  const bands = [...WALK.bands].sort((a, b) => b.min - a.min);
+  for (const b of bands){
+    const [fill, line, op] = WALK_STYLE[b.min] || ['#888', '#555', .15];
+    for (const p of b.polys){
+      const sh = new THREE.Shape(p.outer.map(([x, y]) => new THREE.Vector2(x, y)));
+      for (const h of p.holes) sh.holes.push(new THREE.Path(h.map(([x, y]) => new THREE.Vector2(x, y))));
+      const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), new THREE.MeshBasicMaterial({ color: fill, transparent: true, opacity: op, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }));
+      m.rotation.x = -Math.PI / 2; m.position.y = 0.5 + (15 - b.min) * 0.02; m.renderOrder = 4; ringsGroup.add(m);
+      const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(p.outer.map(([x, y]) => new THREE.Vector3(x, 1.2, -y))), new THREE.LineBasicMaterial({ color: line, transparent: true, opacity: .9 }));
+      ln.renderOrder = 6; ringsGroup.add(ln);
+    }
+    // 標籤放在範圍最東南邊
+    const pts = b.polys.flatMap(p => p.outer); const pk = pts.reduce((a, c) => (c[0] - c[1] > a[0] - a[1] ? c : a), pts[0]);
+    const lab = textSprite(`步行 ${b.min} 分鐘`, { size: 42, fixed: 0.00036, bg: fill === '#e3b04b' ? 'rgba(201,150,60,.95)' : (b.min === 5 ? 'rgba(35,147,92,.95)' : 'rgba(47,102,176,.95)'), depthTest: false });
+    lab.position.set(pk[0], 12, -pk[1]); lab.renderOrder = 22; ringsGroup.add(lab);
+  }
+}
+function walkStats(){
+  if (!WALK) return null;
+  const out = {};
+  for (const b of WALK.bands){
+    const c = { conv: 0, market: 0, bus: 0, pharmacy: 0, food: 0, youbike: 0, pois: [] };
+    for (const [cat, , lat, lon] of SHOPS.items){
+      const x = px({ lat, lon }), n = pn({ lat, lon }); if (Math.hypot(x, n) > b.min * 90) continue;
+      if (!inBand(b, x, n)) continue;
+      if (['711', 'family', 'hilife', 'ok', 'conv'].includes(cat)) c.conv++;
+      else if (['pxmart', 'market', 'carrefour', 'tradmkt'].includes(cat)) c.market++;
+      else if (cat === 'bus') c.bus++;
+      else if (cat === 'pharmacy') c.pharmacy++;
+      else if (['food', 'fastfood', 'cafe', 'drink', 'bakery'].includes(cat)) c.food++;
+      else if (cat === 'youbike') c.youbike++;
+    }
+    for (const p of FOUND) if (inBand(b, p.x, -p.z)) c.pois.push(p.name.replace(/\s+/g, ''));
+    out[b.min] = c;
+  }
+  return out;
+}
+async function showWalk(talk){
+  if (!WALK){ await say('步行生活圈資料還沒載入，請重新整理網頁再試一次。', 'think'); return; }
+  ringsGroup.visible = true; $('bRings').classList.add('on');
+  clearShops(); hidePhoto(); routeGroup.clear(); commuteGroup.clear();
+  flyTo(new THREE.Vector3(0, 0, 150), 2300, 0.55, 2200);
+  if (!talk) return;
+  openAgent(true); stopTour(); stopSpeak();
+  const st = walkStats(), a = st[5], b = st[10], c = st[15];
+  const p10 = b.pois.filter(n => !a.pois.includes(n)).slice(0, 2), p15 = c.pois.filter(n => !b.pois.includes(n)).slice(0, 2);
+  $('agWhere').textContent = '小昕 · 步行生活圈';
+  const cnt = (o, extra) => [o.conv && `${o.conv}家便利商店`, o.market && `${o.market}家超市或市場`, o.bus && `${o.bus}個公車站牌`, extra && o.youbike && `${o.youbike}個YouBike站`, extra && o.food && `${o.food}家餐飲店`].filter(Boolean).join('、');
+  await say(`綠色是從接待中心沿著道路走路5分鐘到得了的範圍${cnt(a) ? '，有' + cnt(a) : ''}。走10分鐘的金色範圍有${cnt(b, true) || '更多生活機能'}${p10.length ? '，還能走到' + p10.join('、') : ''}。15分鐘的藍色範圍有${cnt(c) || '完整的生活機能'}${p15.length ? '，也能走到' + p15.join('、') : ''}，日常採買走路就很方便喔。`, 'explain', ['7-11在哪裡', '附近有公車站嗎', '到高鐵要多久']);
+}
+
+/* ================== 主要地點通勤時間 ================== */
+const commuteGroup = new THREE.Group(); scene.add(commuteGroup);
+function commuteQuery(q){
+  if (!COMMUTE || !/多久|幾分鐘|通勤|開車|怎麼去|車程|多遠|距離/.test(q)) return null;
+  const s = q.toLowerCase();
+  return COMMUTE.list.find(d => new RegExp(d.kw, 'i').test(s)) || (/通勤|上班/.test(q) ? 'all' : null);
+}
+function gmapTo(d, mode){ return `https://www.google.com/maps/dir/?api=1&origin=${SALES_CENTER.lat},${SALES_CENTER.lon}&destination=${d.lat},${d.lon}&travelmode=${mode}`; }
+function drawCommute(d){
+  commuteGroup.clear();
+  const pts = [];
+  for (const [lo, la] of d.path){ const x = px({ lat: la, lon: lo }), z = -pn({ lat: la, lon: lo }); pts.push([x, z]); }
+  // 只畫地圖範圍內，超出的部分在邊界放「往○○」標籤
+  const inside = []; let edge = null;
+  for (let i = 0; i < pts.length; i++){
+    const [x, z] = pts[i];
+    if (Math.hypot(x, z) <= R_OUT - 80){ inside.push(pts[i]); continue; }
+    const [x0, z0] = pts[i - 1] || pts[i]; const r0 = Math.hypot(x0, z0), r1 = Math.hypot(x, z), f = (R_OUT - 80 - r0) / ((r1 - r0) || 1);
+    edge = [x0 + (x - x0) * f, z0 + (z - z0) * f]; inside.push(edge); break;
+  }
+  const W = 7, pos = [], idx = [];
+  for (let i = 0; i < inside.length; i++){
+    const a = inside[Math.max(0, i - 1)], b = inside[Math.min(inside.length - 1, i + 1)];
+    let tx = b[0] - a[0], tz = b[1] - a[1]; const L = Math.hypot(tx, tz) || 1; tx /= L; tz /= L;
+    pos.push(inside[i][0] - tz * W, 9, inside[i][1] + tx * W, inside[i][0] + tz * W, 9, inside[i][1] - tx * W);
+    if (i < inside.length - 1){ const k = i * 2; idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: '#e0a83a', transparent: true, opacity: .85, depthWrite: false, side: THREE.DoubleSide }));
+  m.renderOrder = 7; commuteGroup.add(m);
+  const end = edge || inside[inside.length - 1];
+  const lab = textSprite(`${edge ? '往' : ''}${d.name}・開車約 ${d.min[0]}～${d.min[1]} 分鐘${edge ? ' →' : ''}`, { size: 42, fixed: 0.0004, bg: 'rgba(201,150,60,.96)', color: '#1b2436', depthTest: false });
+  lab.position.set(end[0], 40, end[1]); lab.renderOrder = 23; commuteGroup.add(lab);
+  const dist = Math.min(4200, Math.max(900, Math.hypot(end[0], end[1]) * 1.5));
+  flyTo(new THREE.Vector3(end[0] / 2, 0, end[1] / 2), dist, 0.75, 2000);
+}
+async function showCommute(dst, talk){
+  if (!COMMUTE){ await say('通勤資料還沒載入，請重新整理網頁再試一次。', 'think'); return; }
+  clearShops(); hidePhoto(); routeGroup.clear();
+  $('scTitle').textContent = '主要地點通勤時間（從接待中心出發）';
+  $('scUpd').textContent = '開車為離峰估算';
+  $('scList').innerHTML = '';
+  COMMUTE.list.forEach((d, i) => {
+    const row = document.createElement('div'); row.className = 'it';
+    row.innerHTML = `<span class="no" style="background:#c9963c">${i + 1}</span><span class="tx"><div class="nm"></div><div class="ds"></div></span><a target="_blank" rel="noopener">開車</a><a target="_blank" rel="noopener" style="background:#2f8f5b">大眾運輸</a>`;
+    row.querySelector('.nm').textContent = d.name;
+    row.querySelector('.ds').textContent = `開車約 ${d.min[0]}～${d.min[1]} 分鐘・${d.km} 公里`;
+    const [a1, a2] = row.querySelectorAll('a'); a1.href = gmapTo(d, 'driving'); a2.href = gmapTo(d, 'transit');
+    a1.onclick = a2.onclick = e => e.stopPropagation();
+    row.onclick = () => { drawCommute(d); say(`到${d.name}大約${d.km}公里，開車離峰大約${d.min[0]}到${d.min[1]}分鐘。想看大眾運輸怎麼搭，可以按旁邊的按鈕用Google地圖查即時路線。`, 'point'); };
+    $('scList').appendChild(row);
+  });
+  $('shopCard').classList.add('show');
+  const d = dst && dst !== 'all' ? dst : null;
+  if (d) drawCommute(d); else { commuteGroup.clear(); flyTo(new THREE.Vector3(-800, 0, 0), 4200, 0.7, 2000); }
+  if (!talk) return;
+  openAgent(true); stopTour(); stopSpeak();
+  $('agWhere').textContent = '小昕 · 通勤時間';
+  if (d) await say(`從接待中心到${d.name}大約${d.km}公里，開車離峰大約${d.min[0]}到${d.min[1]}分鐘，尖峰時間會再久一點。左邊清單有一鍵Google導航，也可以查大眾運輸路線。`, 'point', ['到台中車站要多久', '到中科要多久', '走路10分鐘有什麼']);
+  else await say(`我把主要地點的開車時間列在左邊了：台中車站大約${COMMUTE.list[0].min[0]}到${COMMUTE.list[0].min[1]}分鐘，高鐵台中站大約${COMMUTE.list[1].min[0]}到${COMMUTE.list[1].min[1]}分鐘，走台74串聯市區很方便。點清單可以看路線，也能一鍵Google導航。`, 'explain', ['到高鐵要多久', '到中科要多久', '到市政府要多久']);
+}
+
+/* ================== 未來重大建設（規劃中）================== */
+const futureGroup = new THREE.Group(); scene.add(futureGroup);
+function buildFuture(){
+  futureGroup.clear(); if (!METRO) return;
+  const p = METRO.pts.map(([x, y]) => [x, -y]);
+  // 虛線帶（藍色），每段 40 公尺畫 25 公尺
+  const W = 6, mat = new THREE.MeshBasicMaterial({ color: '#3b6fd8', transparent: true, opacity: .9, depthWrite: false, side: THREE.DoubleSide });
+  const pos = [], idx = [];
+  for (let i = 0; i < p.length - 1; i++){
+    const [x0, z0] = p[i], [x1, z1] = p[i + 1], L = Math.hypot(x1 - x0, z1 - z0); if (L < 1) continue;
+    const tx = (x1 - x0) / L, tz = (z1 - z0) / L;
+    for (let s = 0; s < L; s += 40){
+      const e = Math.min(L, s + 25), ax = x0 + tx * s, az = z0 + tz * s, bx = x0 + tx * e, bz = z0 + tz * e, k = pos.length / 3;
+      pos.push(ax - tz * W, 3, az + tx * W, ax + tz * W, 3, az - tx * W, bx - tz * W, 3, bz + tx * W, bx + tz * W, 3, bz - tx * W);
+      idx.push(k, k + 1, k + 2, k + 1, k + 3, k + 2);
+    }
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setIndex(idx);
+  const m = new THREE.Mesh(g, mat); m.renderOrder = 8; futureGroup.add(m);
+  const mid = p[Math.floor(p.length / 2)];
+  const lab = vTextSprite('捷運藍線延伸太平線・規劃中', { size: 44, fixed: 0.00036, bg: 'rgba(59,111,216,.94)', depthTest: false });
+  lab.position.set(mid[0], 30, mid[1]); lab.renderOrder = 24; futureGroup.add(lab);
+  const tag = textSprite('尚未核定・路線為示意', { size: 38, fixed: 0.0003, bg: 'rgba(255,255,255,.95)', color: '#3b6fd8', depthTest: false });
+  tag.position.set(mid[0], 12, mid[1]); tag.renderOrder = 24; futureGroup.add(tag);
+  const e = p[p.length - 1];
+  const lb = textSprite('銜接藍線 B20 站（規劃）', { size: 40, fixed: 0.00032, bg: 'rgba(59,111,216,.94)', depthTest: false });
+  lb.position.set(e[0], 20, e[1]); lb.renderOrder = 24; futureGroup.add(lb);
+  futureGroup.visible = LS.get('future', true);
+}
+async function showFuture(talk){
+  if (!METRO){ await say('未來建設資料還沒載入，請重新整理網頁再試一次。', 'think'); return; }
+  futureGroup.visible = true; $('bFuture').classList.add('on');
+  clearShops(); hidePhoto(); routeGroup.clear(); commuteGroup.clear();
+  flyTo(new THREE.Vector3(-300, 0, 600), 3600, 0.6, 2200);
+  if (!talk) return;
+  openAgent(true); stopTour(); stopSpeak();
+  $('agWhere').textContent = '小昕 · 未來建設';
+  await say('藍色虛線是台中捷運藍線延伸太平線的規劃路線示意，預計從東平路經中興東路、中興路、太平路、振興路到進德路，銜接藍線B20站，約4.66公里、地下4站。目前可行性研究還在交通部審查中、尚未核定，站點位置也還沒公布，實際以政府公告為準喔。', 'explain', ['附近有公車站嗎', '到台中車站要多久', '走路10分鐘有什麼']);
+}
+
+/* ================== 生活設施圖示（YouBike、市場、夜市、停車場、醫院）================== */
+const facGroup = new THREE.Group(); scene.add(facGroup);
+let FAC_ON = LS.get('fac', true), FAC_LIST = [];
+const FAC_DEF = { youbike: ['#f2a900', 'U', 'YouBike 站'], tradmkt: ['#c0612b', '市', '傳統市場'], nightmkt: ['#8e44ad', '夜', '夜市'], parking: ['#2c6fb7', 'P', '停車場'], hospital: ['#d0342c', '醫', '醫院'] };
+const FAC_TEX = {};
+function facIcon(cat){
+  if (FAC_TEX[cat]) return FAC_TEX[cat];
+  const [col, ch] = FAC_DEF[cat], S = 96, cv = document.createElement('canvas'); cv.width = S; cv.height = S + 18;
+  const g = cv.getContext('2d');
+  g.fillStyle = col; g.beginPath(); g.roundRect(6, 6, S - 12, S - 12, 18); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 5; g.stroke();
+  g.beginPath(); g.moveTo(S / 2 - 9, S - 7); g.lineTo(S / 2, S + 12); g.lineTo(S / 2 + 9, S - 7); g.fillStyle = col; g.fill();
+  g.fillStyle = '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.font = `800 ${ch.length > 1 ? 40 : 52}px "Noto Sans TC","Microsoft JhengHei",sans-serif`; g.fillText(ch, S / 2, S / 2 + 2);
+  const tex = new THREE.CanvasTexture(cv); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8;
+  return (FAC_TEX[cat] = { tex, W: cv.width, H: cv.height });
+}
+function buildFac(){
+  facGroup.clear(); FAC_LIST = [];
+  for (const [cat, name, lat, lon, addr] of SHOPS.items){
+    if (!FAC_DEF[cat]) continue;
+    const x = px({ lat, lon }), z = -pn({ lat, lon }), d = Math.hypot(x, z);
+    if (d > (cat === 'parking' || cat === 'youbike' ? 1300 : 2400)) continue;
+    const { tex, W, H } = facIcon(cat);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false }));
+    sp.center.set(0.5, 0); sp.material.sizeAttenuation = false; const f = 0.00027; sp.scale.set(W * f, H * f, 1);
+    sp.position.set(x, 2, z); sp.renderOrder = 19; sp.userData.fac = FAC_LIST.length;
+    FAC_LIST.push({ cat, name, lat, lon, addr, x, z, d, label: FAC_DEF[cat][2] }); facGroup.add(sp);
+  }
+  facGroup.visible = FAC_ON;
+}
+function showFacItem(i){
+  const it = FAC_LIST[i]; if (!it) return;
+  openAgent(true); stopTour(); stopSpeak();
+  const same = FAC_LIST.filter(b => b.cat === it.cat && b !== it).sort((a, b) => a.d - b.d).slice(0, 5);
+  showShops({ cats: [it.cat], label: it.label }, [it, ...same]);
+  $('scTitle').textContent = `${it.label}：${it.name}`;
+  focusShop(0, true);
+}
+
+/* ================== 樓層景觀・日照模擬 ================== */
+const SIM = { on: false, look: false, dir: 'S', day: 356, hour: 15, saved: null };
+// 塔樓外框（依 SketchUp 模型：東西 -14.5～27.2 公尺、南北 -12.7～11.3 公尺，1F 約 4.5 公尺、標準層約 3.1 公尺）
+const TOWER = { x0: -14.5, x1: 27.2, n0: -12.7, n1: 11.3, f1: 4.5, fh: 3.1, base: 0.22 };
+function sunPos(day, hour){
+  const lat = SALES_CENTER.lat * Math.PI / 180;
+  const decl = 23.44 * Math.PI / 180 * Math.sin(2 * Math.PI * (284 + day) / 365);
+  const B = 2 * Math.PI * (day - 81) / 364, eot = 9.87 * Math.sin(2 * B) - 7.53 * Math.cos(B) - 1.5 * Math.sin(B);
+  const solar = hour + ((SALES_CENTER.lon - 120) * 4 + eot) / 60, H = (solar - 12) * 15 * Math.PI / 180;
+  const el = Math.asin(Math.sin(lat) * Math.sin(decl) + Math.cos(lat) * Math.cos(decl) * Math.cos(H));
+  const az = Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(lat) - Math.tan(decl) * Math.cos(lat));   // 由南往西量
+  const east = -Math.sin(az), north = -Math.cos(az);
+  return { el, az, v: new THREE.Vector3(east * Math.cos(el), Math.sin(el), -north * Math.cos(el)).normalize() };
+}
+const DIR_NAME = { S: '南', E: '東', W: '西', N: '北' };
+function compass(v){ const a = (Math.atan2(v.x, -v.z) * 180 / Math.PI + 360) % 360; return ['北', '東北', '東', '東南', '南', '西南', '西', '西北'][Math.round(a / 45) % 8]; }
+let HEMI = null;
+function applySun(){
+  const s = sunPos(SIM.day, SIM.hour), elD = s.el * 180 / Math.PI;
+  if (!HEMI) scene.traverse(o => { if (o.isHemisphereLight) HEMI = o; });
+  const up = Math.max(0, Math.sin(s.el));
+  SUN_DIR.copy(elD > 1 ? s.v : new THREE.Vector3(s.v.x, 0.02, s.v.z).normalize());
+  SKY_U.uSun.value.copy(SUN_DIR);
+  sun.intensity = elD > 0 ? 0.6 + 1.8 * Math.min(1, up * 1.6) : 0.15;
+  sun.color.set(elD < 12 ? '#ffd2a1' : '#fff4e2');
+  if (HEMI) HEMI.intensity = 0.55 + 0.6 * Math.min(1, up * 1.5);
+  const lit = ['S', 'E', 'W', 'N'].filter(k => ({ S: s.v.z, E: s.v.x, W: -s.v.x, N: -s.v.z })[k] > 0.08 && elD > 0);
+  const t = `${Math.floor(SIM.hour)}:${String(Math.round((SIM.hour % 1) * 60)).padStart(2, '0')}`;
+  const season = { 80: '春分', 172: '夏至', 266: '秋分', 356: '冬至' }[SIM.day];
+  $('simHourV').textContent = t;
+  $('simInfo').innerHTML = elD <= 0 ? `${season} ${t}：太陽已下山。` :
+    `${season} ${t}：太陽在<b>${compass(s.v)}方</b>、仰角 ${elD.toFixed(0)}°。受光立面：<b>${lit.map(k => DIR_NAME[k] + '向').join('、') || '—'}</b>` +
+    (SIM.hour >= 14 && lit.includes('W') ? '（西向下午有西曬）' : '') + (SIM.dir && lit.includes(SIM.dir) ? `。您選的${DIR_NAME[SIM.dir]}向窗戶此時有陽光。` : `。您選的${DIR_NAME[SIM.dir]}向窗戶此時沒有直射陽光。`);
+}
+// 日照模式：地面改成能接收即時陰影的材質（平常用烘焙好的固定陰影）
+function groundLive(on){
+  for (const o of BLDG_BAKED){ o.material = on ? o.userData.liveMat : o.userData.bakedMat; o.receiveShadow = on; }
+  scene.traverse(o => {
+    if (!o.isMesh || !GROUND_NAMES.test(o.name)) return;
+    if (on){
+      if (!o.userData.bakedMat){
+        o.userData.bakedMat = o.material;
+        const conv = m => new THREE.MeshLambertMaterial({ map: m.map, color: m.color.clone().multiplyScalar(0.78), side: THREE.DoubleSide, polygonOffset: m.polygonOffset, polygonOffsetFactor: m.polygonOffsetFactor, polygonOffsetUnits: m.polygonOffsetUnits });
+        o.userData.liveMat = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
+      }
+      o.material = o.userData.liveMat; o.receiveShadow = true;
+    } else if (o.userData.bakedMat){ o.material = o.userData.bakedMat; o.receiveShadow = false; }
+  });
+}
+function simEye(){
+  const f = +$('simFloor').value, y = TOWER.base + TOWER.f1 + (f - 1 - 1) * TOWER.fh + TOWER.fh + 1.5;   // 該層樓板＋眼睛高度 1.5 公尺
+  const cx = (TOWER.x0 + TOWER.x1) / 2, cn = (TOWER.n0 + TOWER.n1) / 2, o = 1.6;
+  const E = { S: [cx, -(TOWER.n0 - o), 0, 1], N: [cx, -(TOWER.n1 + o), 0, -1], E: [TOWER.x1 + o, -cn, 1, 0], W: [TOWER.x0 - o, -cn, -1, 0] }[SIM.dir];
+  const p = new THREE.Vector3(E[0], y, E[1]), dd = new THREE.Vector3(E[2], -0.08, E[3]).normalize();
+  if (bldModel){ bldModel.updateMatrixWorld(); p.applyMatrix4(bldModel.matrixWorld); dd.transformDirection(bldModel.matrixWorld); }
+  return { p, d: dd };
+}
+function simLook(){
+  SIM.look = true; poiGroup.visible = false;
+  const { p, d } = simEye();
+  cancelAnim(); controls.autoRotate = false;
+  controls.minDistance = 0.5; controls.maxPolarAngle = Math.PI * 0.62;
+  camera.fov = 62; camera.updateProjectionMatrix();
+  controls.target.copy(p).addScaledVector(d, 3); camera.position.copy(p);
+  controls.update();
+  toast(`${$('simFloor').value}F ${DIR_NAME[SIM.dir]}向窗景（拖曳可左右看）`, 3000);
+}
+function simOut(){
+  SIM.look = false; restoreCam(); if (SIM.saved) poiGroup.visible = SIM.saved.pois;
+  flyTo(new THREE.Vector3(6, 25, 0), 260, 1.0, 1400, Math.atan2(-SUN_DIR.x, -SUN_DIR.z) + Math.PI);
+}
+function restoreCam(){ controls.minDistance = 40; controls.maxPolarAngle = Math.PI * 0.46; camera.fov = 42; camera.updateProjectionMatrix(); }
+function openSim(){
+  if (!MAIN_BLDG){ toast('主建築模型還在載入，請稍候再試'); return; }
+  SIM.on = true; SIM.saved = { rings: ringsGroup.visible, pois: poiGroup.visible, dir: SUN_DIR.clone(), hq: HQ, si: sun.intensity, sc: sun.color.clone(), hi: HEMI ? HEMI.intensity : null };
+  if (!HQ){ HQ = true; applyQuality(); }
+  document.body.classList.add('sim-on'); $('simPanel').hidden = false;
+  clearShops(); hidePhoto(); routeGroup.clear(); commuteGroup.clear();
+  ringsGroup.visible = false; groundLive(true); applySun(); simOut();
+  setNav('view');
+}
+function closeSim(){
+  if (!SIM.on) return;
+  SIM.on = false; $('simPanel').hidden = true; document.body.classList.remove('sim-on');
+  groundLive(false); restoreCam(); SIM.look = false;
+  const s = SIM.saved; ringsGroup.visible = s.rings; poiGroup.visible = s.pois; SUN_DIR.copy(s.dir); SKY_U.uSun.value.copy(s.dir); sun.intensity = s.si; sun.color.copy(s.sc); if (HEMI && s.hi != null) HEMI.intensity = s.hi;
+  if (!s.hq){ HQ = false; applyQuality(); }
+  goHome(); setNav('pos');
+}
+$('simX').onclick = closeSim;
+$('simLook').onclick = simLook; $('simOut').onclick = simOut;
+$('simFloor').oninput = () => { $('simFloorV').textContent = $('simFloor').value + 'F'; if (SIM.look) simLook(); };
+$('simHour').oninput = () => { SIM.hour = +$('simHour').value; applySun(); };
+document.querySelectorAll('#simDir button').forEach(b => b.onclick = () => { document.querySelectorAll('#simDir button').forEach(x => x.classList.toggle('act', x === b)); SIM.dir = b.dataset.d; applySun(); if (SIM.look) simLook(); });
+document.querySelectorAll('#simSeason button').forEach(b => b.onclick = () => { document.querySelectorAll('#simSeason button').forEach(x => x.classList.toggle('act', x === b)); SIM.day = +b.dataset.s; applySun(); });
+
+/* ================== 預約賞屋 ================== */
+function openLead(){ $('ldMsg').textContent = ''; $('ldMsg').className = 'msg'; $('mLead').style.display = 'flex'; setTimeout(() => $('ldName').focus(), 50); }
+$('bLead').onclick = openLead;
+$('ldCancel').onclick = () => { $('mLead').style.display = 'none'; };
+$('ldSend').onclick = async () => {
+  const v = id => $(id).value.trim(), msg = $('ldMsg');
+  if (!v('ldName') || !v('ldPhone')){ msg.textContent = '請填寫姓名與電話'; return; }
+  if (!/^[0-9+\-\s()#]{8,20}$/.test(v('ldPhone'))){ msg.textContent = '電話格式看起來不對，請再確認'; return; }
+  if (!$('ldOK').checked){ msg.textContent = '請勾選同意，我們才能與您聯繫'; return; }
+  if (!SRV){ msg.className = 'msg'; msg.innerHTML = '線上預約即將開通，目前請直接洽詢秉和昕心接待中心：臺中市太平區祥順路一段11號，謝謝您！'; return; }
+  const b = $('ldSend'); b.disabled = true; b.textContent = '送出中…';
+  try{
+    const r = await fetch(API + 'lead', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: v('ldName'), phone: v('ldPhone'), line: v('ldLine'), time: $('ldTime').value, rooms: $('ldRooms').value, note: v('ldNote'), page: '3D 鳥瞰地圖' }) });
+    if (r.status === 404) throw new Error('伺服器是舊版，請關閉伺服器視窗後重新雙擊「開啟鳥瞰地圖.bat」');
+    const j = await r.json(); if (!j.ok) throw new Error(j.error || '送出失敗');
+    msg.className = 'msg ok'; msg.textContent = '已收到您的預約，專人會盡快與您聯繫，謝謝！';
+    ['ldName', 'ldPhone', 'ldLine', 'ldNote'].forEach(id => $(id).value = ''); $('ldOK').checked = false;
+    setTimeout(() => { $('mLead').style.display = 'none'; }, 2200);
+  }catch(e){ msg.className = 'msg'; msg.textContent = '送出失敗：' + (e.message || e); }
+  b.disabled = false; b.textContent = '送出預約';
+};
+
+/* ================== 分享 QR Code ================== */
+function shareUrl(){ const u = (LS.get('shareUrl', '') || '').trim(); return u || location.origin + location.pathname; }
+function makeQR(url, px = 8){
+  const q = qrcode(0, 'M'); q.addData(unescape(encodeURIComponent(url))); q.make();
+  const n = q.getModuleCount(), m = 4, cv = document.createElement('canvas'); cv.width = cv.height = (n + m * 2) * px;
+  const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.fillStyle = '#14284b';
+  for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) g.fillRect((c + m) * px, (r + m) * px, px, px);
+  return cv;
+}
+$('bShare').onclick = () => {
+  const url = shareUrl(); $('shUrl').textContent = url; $('shMsg').className = 'msg';
+  $('shMsg').textContent = /localhost|127\.0\.0\.1/.test(url) ? '目前是本機網址，只有這台電腦能開。放上雲端後請到「設定」填入雲端網址，再產生 QR Code。' : '';
+  $('qrBox').innerHTML = '';
+  if (!window.qrcode){ $('qrBox').textContent = 'QR Code 元件載入失敗（需要網路）'; } else $('qrBox').appendChild(makeQR(url, 6));
+  $('mShare').style.display = 'flex';
+};
+$('shOK').onclick = () => { $('mShare').style.display = 'none'; };
+$('shCopy').onclick = async () => { try{ await navigator.clipboard.writeText(shareUrl()); $('shMsg').className = 'msg ok'; $('shMsg').textContent = '連結已複製'; }catch(e){ $('shMsg').textContent = '無法複製，請手動選取上方網址'; } };
+$('shDl').onclick = () => {
+  if (!window.qrcode) return;
+  const q = makeQR(shareUrl(), 16), W = q.width + 120, H = q.height + 260, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+  const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#14284b'; g.textAlign = 'center'; g.font = '700 54px "Noto Sans TC","Microsoft JhengHei",sans-serif'; g.fillText('秉和昕心', W / 2, 90);
+  g.fillStyle = '#b88f45'; g.font = '500 30px "Noto Sans TC","Microsoft JhengHei",sans-serif'; g.fillText('掃描看周邊 3D 鳥瞰地圖', W / 2, 140);
+  g.drawImage(q, 60, 170);
+  g.fillStyle = '#5b6573'; g.font = '400 24px "Noto Sans TC","Microsoft JhengHei",sans-serif'; g.fillText('臺中市太平區祥順路一段11號', W / 2, H - 40);
+  const a = document.createElement('a'); a.download = '秉和昕心_鳥瞰地圖_QR.png'; a.href = cv.toDataURL('image/png'); a.click();
+};
+$('bFac').onclick = e => { FAC_ON = !FAC_ON; LS.set('fac', FAC_ON); facGroup.visible = FAC_ON; e.currentTarget.classList.toggle('on', FAC_ON); };
+$('bFac').classList.toggle('on', FAC_ON);
+$('bFuture').onclick = e => { futureGroup.visible = !futureGroup.visible; LS.set('future', futureGroup.visible); e.currentTarget.classList.toggle('on', futureGroup.visible); };
+$('bFuture').classList.toggle('on', LS.get('future', true));
+
+/* ================== 繪製迴圈 ================== */
+const clock = new THREE.Clock();
+let _lastT = performance.now();
+function dtClock(){ const n = performance.now(), d = (n - _lastT) / 1000; _lastT = n; return d; }
+renderer.setAnimationLoop(now => {
+  if (anim) anim(now);
+  const t = clock.getElapsedTime();
+  if (pulse){ const s = 1 + (t % 2) * 2.2; pulse.scale.set(s, s, 1); pulse.material.opacity = 0.9 * (1 - (t % 2) / 2); }
+  const tg = controls.target, d = Math.hypot(tg.x, tg.z);
+  if (d > R_OUT){ const k = R_OUT / d, dx = tg.x * (1 - k), dz = tg.z * (1 - k); tg.x -= dx; tg.z -= dz; camera.position.x -= dx; camera.position.z -= dz; }
+  controls.update();
+  // 依視角距離調整景深範圍（避免地面標線閃爍）
+  const cd = camera.position.distanceTo(controls.target);
+  const nn = THREE.MathUtils.clamp(cd * 0.012, 0.5, 40);
+  if (Math.abs(nn - camera.near) / camera.near > 0.15){ camera.near = nn; camera.updateProjectionMatrix(); }
+  // 陰影範圍跟著目前看的區域
+  const half = THREE.MathUtils.clamp(cd * 0.7, 140, 1300);
+  const sc = sun.shadow.camera;
+  if (Math.abs(sc.right - half) > half * 0.08){ sc.left = -half; sc.right = half; sc.top = half; sc.bottom = -half; sc.updateProjectionMatrix(); }
+  sun.target.position.copy(controls.target); sun.position.copy(controls.target).addScaledVector(SUN_DIR, 2200);
+  sc.near = 200; sc.far = 4400;
+  nearNames.visible = cd < 950;
+  if (BUS_ON) busGroup.visible = cd < 1000 && !SIM.look;
+  if (FAC_ON) facGroup.visible = cd < 900 && !SIM.look;
+  if (SIM.look) nearNames.visible = false;
+  sky.position.copy(camera.position); SKY_U.uTime.value = t;
+  // 河面波紋流動
+  WATER_N.offset.x = t * 0.010; WATER_N.offset.y = t * 0.006;
+  updateCars(Math.min(0.05, clock.getDelta ? dtClock() : 0.016));
+  if (composer) composer.render(); else renderer.render(scene, camera);
+});
+
+// 測試與除錯用
+window.__cars = CARS;
+window.__shot = () => { if (composer) composer.render(); else renderer.render(scene, camera); return renderer.domElement.toDataURL('image/jpeg', 0.85); };
+window.__test = { drawCommute: i => drawCommute(COMMUTE.list[i]), sim: () => SIM, applySun, groundLive };
+window.__cam = { cam: camera, controls, get target(){ return controls.target; } };
+window.__map = { found: () => FOUND, fetchShopsOSM, parseBus, shops: () => SHOPS, ask, openAgent, state: () => ({ tour: AG.tour, busy: AG.busy }) };
+boot(new URLSearchParams(location.search).has('refresh'));
+</script>
+</body>
+</html>
